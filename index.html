@@ -1,0 +1,3179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pratix PDF Toolkit – Free Browser-Based PDF Editor</title>
+  <meta name="description" content="Edit, merge, split, rotate, reorder, and redact PDF files privately in your browser. No uploads, no server, 100% client-side. Free PDF tools by Pratix.io." />
+  <meta name="keywords" content="pdf editor, pdf merge, pdf split, pdf rotate, pdf redaction, images to pdf, pdf metadata cleaner, browser pdf tool, client-side pdf, free pdf tools, pratix" />
+  <meta name="author" content="Pratix.io" />
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#3b82f6" />
+  <meta property="og:title" content="Pratix PDF Toolkit – Private, Fast, Browser-Based PDF Editing" />
+  <meta property="og:description" content="Free PDF tools that run 100% in your browser. Merge, split, rotate, reorder, redact, and more — no uploads, no server." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://pratix.io/pdf-toolkit" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+/* ============================================================
+   RESET & BASE
+============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --brand-blue: #3b82f6;
+  --brand-indigo: #6366f1;
+  --brand-purple: #8b5cf6;
+  --brand-cyan: #06b6d4;
+  --brand-gradient: linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #8b5cf6 100%);
+  --brand-gradient-soft: linear-gradient(135deg, rgba(59,130,246,0.08) 0%, rgba(139,92,246,0.08) 100%);
+  --surface: #ffffff;
+  --surface-2: #f8fafc;
+  --surface-3: #f1f5f9;
+  --border: #e2e8f0;
+  --border-soft: rgba(148,163,184,0.3);
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --info: #3b82f6;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
+  --shadow-lg: 0 10px 40px rgba(0,0,0,0.1), 0 4px 12px rgba(0,0,0,0.05);
+  --shadow-brand: 0 8px 32px rgba(99,102,241,0.18);
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--surface-2);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+a { color: var(--brand-blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button { cursor: pointer; font-family: inherit; }
+input, select, textarea { font-family: inherit; }
+img { max-width: 100%; }
+
+/* ============================================================
+   SCROLLBAR
+============================================================ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--surface-3); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ============================================================
+   ADVERTISEMENT SLOTS
+============================================================ */
+.ad-slot {
+  width: 100%;
+  border: 1.5px dashed rgba(148,163,184,0.55);
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(248,250,252,0.98), rgba(239,246,255,0.96));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 14px;
+  transition: border-color 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.ad-slot::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(59,130,246,0.02), rgba(139,92,246,0.02));
+  pointer-events: none;
+}
+.ad-leaderboard { min-height: 90px; }
+.ad-native { min-height: 200px; }
+.ad-inarticle { min-height: 120px; }
+.ad-footer { min-height: 90px; }
+
+/* ============================================================
+   HEADER
+============================================================ */
+#site-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+}
+.header-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.brand-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--brand-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 900;
+  font-size: 16px;
+  letter-spacing: -0.5px;
+  box-shadow: var(--shadow-brand);
+}
+.brand-text { display: flex; flex-direction: column; line-height: 1.1; }
+.brand-name {
+  font-size: 17px;
+  font-weight: 800;
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.brand-sub {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.header-divider {
+  width: 1px;
+  height: 28px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+.header-product {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+.header-product-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.header-product-sub {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+.header-spacer { flex: 1; }
+.header-back-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-decoration: none;
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.header-back-link:hover {
+  color: var(--brand-blue);
+  border-color: var(--brand-blue);
+  background: rgba(59,130,246,0.04);
+  text-decoration: none;
+}
+.header-back-link svg { width: 14px; height: 14px; }
+.lang-select {
+  appearance: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 7px 28px 7px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  transition: border-color 0.2s;
+}
+.lang-select:hover { border-color: var(--brand-blue); }
+.lang-select:focus { outline: none; border-color: var(--brand-blue); box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
+@media (max-width: 640px) {
+  .header-divider, .header-product, .brand-sub { display: none; }
+  .header-back-link span { display: none; }
+  .header-back-link { padding: 7px 10px; }
+  .header-inner { padding: 0 16px; gap: 10px; }
+}
+
+/* ============================================================
+   HERO
+============================================================ */
+#hero {
+  background: linear-gradient(160deg, #f0f7ff 0%, #f5f3ff 50%, #fdf4ff 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 56px 24px 48px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+#hero::before {
+  content: '';
+  position: absolute;
+  top: -60px; left: 50%; transform: translateX(-50%);
+  width: 600px; height: 300px;
+  background: radial-gradient(ellipse, rgba(99,102,241,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(99,102,241,0.08);
+  border: 1px solid rgba(99,102,241,0.2);
+  color: var(--brand-indigo);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 5px 14px;
+  border-radius: 100px;
+  margin-bottom: 20px;
+}
+.hero-badge-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--brand-indigo);
+  animation: pulse-dot 2s infinite;
+}
+@keyframes pulse-dot {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+.hero-title {
+  font-size: clamp(28px, 5vw, 52px);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+.hero-title .gradient-text {
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-desc {
+  font-size: clamp(15px, 2vw, 18px);
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto 28px;
+  font-weight: 400;
+}
+.hero-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 0;
+}
+.hero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  box-shadow: var(--shadow-sm);
+}
+.hero-pill .pill-icon { font-size: 13px; }
+
+/* ============================================================
+   PRIVACY BANNER
+============================================================ */
+.privacy-banner {
+  background: linear-gradient(135deg, rgba(16,185,129,0.06), rgba(6,182,212,0.06));
+  border: 1px solid rgba(16,185,129,0.2);
+  border-radius: var(--radius-lg);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  max-width: 800px;
+  margin: 0 auto;
+}
+.privacy-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #059669;
+}
+.privacy-item svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+/* ============================================================
+   LAYOUT
+============================================================ */
+.page-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+.ad-top-wrap { padding: 20px 24px; max-width: 1400px; margin: 0 auto; }
+.workspace {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 24px;
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .workspace { grid-template-columns: 1fr; padding: 16px; gap: 16px; }
+}
+
+/* ============================================================
+   SIDEBAR
+============================================================ */
+.sidebar { display: flex; flex-direction: column; gap: 16px; }
+.sidebar-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.sidebar-title {
+  padding: 14px 16px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+.tool-list { padding: 8px; }
+.tool-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.18s;
+  text-align: left;
+}
+.tool-btn:hover { background: var(--surface-3); color: var(--text-primary); }
+.tool-btn.active {
+  background: var(--brand-gradient-soft);
+  color: var(--brand-indigo);
+  font-weight: 700;
+}
+.tool-btn .tool-icon {
+  width: 28px; height: 28px;
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  background: var(--surface-3);
+  flex-shrink: 0;
+  transition: all 0.18s;
+}
+.tool-btn.active .tool-icon {
+  background: var(--brand-gradient);
+  box-shadow: 0 2px 8px rgba(99,102,241,0.3);
+}
+.tool-btn.active .tool-icon svg { color: white; }
+
+/* ============================================================
+   MAIN PANEL
+============================================================ */
+.main-panel { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+
+/* ============================================================
+   CARD
+============================================================ */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+.card-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.card-header-icon {
+  width: 44px; height: 44px;
+  border-radius: var(--radius-md);
+  background: var(--brand-gradient);
+  display: flex; align-items: center; justify-content: center;
+  color: white;
+  font-size: 20px;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-brand);
+}
+.card-header-text h2 {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+.card-header-text p {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.card-body { padding: 24px; }
+
+/* ============================================================
+   DROPZONE
+============================================================ */
+.dropzone {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-lg);
+  padding: 40px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--surface-2);
+  position: relative;
+}
+.dropzone:hover, .dropzone.drag-over {
+  border-color: var(--brand-blue);
+  background: rgba(59,130,246,0.04);
+}
+.dropzone input[type="file"] {
+  position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+}
+.dropzone-icon {
+  font-size: 36px; margin-bottom: 12px; display: block;
+}
+.dropzone-title {
+  font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;
+}
+.dropzone-sub { font-size: 13px; color: var(--text-muted); }
+.dropzone-sub strong { color: var(--brand-blue); }
+
+/* ============================================================
+   BUTTONS
+============================================================ */
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  border: none;
+  font-size: 14px; font-weight: 600;
+  transition: all 0.18s;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+.btn-primary {
+  background: var(--brand-gradient);
+  color: white;
+  box-shadow: 0 4px 14px rgba(99,102,241,0.3);
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(99,102,241,0.4); }
+.btn-primary:active { transform: translateY(0); }
+.btn-secondary {
+  background: var(--surface);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.btn-secondary:hover { background: var(--surface-3); color: var(--text-primary); }
+.btn-danger {
+  background: rgba(239,68,68,0.08);
+  color: var(--error);
+  border: 1px solid rgba(239,68,68,0.2);
+}
+.btn-danger:hover { background: rgba(239,68,68,0.14); }
+.btn-success {
+  background: rgba(16,185,129,0.08);
+  color: var(--success);
+  border: 1px solid rgba(16,185,129,0.2);
+}
+.btn-success:hover { background: rgba(16,185,129,0.14); }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn-xs { padding: 4px 8px; font-size: 11px; border-radius: 6px; }
+.btn-group { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+/* ============================================================
+   STATUS / ALERTS
+============================================================ */
+.status-box {
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  animation: fadeIn 0.3s ease;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+.status-box svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
+.status-info { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); color: #1d4ed8; }
+.status-success { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); color: #065f46; }
+.status-warning { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); color: #92400e; }
+.status-error { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); color: #991b1b; }
+
+/* ============================================================
+   FORM ELEMENTS
+============================================================ */
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-label { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+.form-input {
+  padding: 9px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--text-primary);
+  background: var(--surface);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-input:focus { outline: none; border-color: var(--brand-blue); box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
+.form-hint { font-size: 11px; color: var(--text-muted); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+.form-select {
+  padding: 9px 32px 9px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--text-primary);
+  background: var(--surface);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.form-select:focus { outline: none; border-color: var(--brand-blue); box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
+
+/* ============================================================
+   FILE LIST
+============================================================ */
+.file-list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.file-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  cursor: grab;
+}
+.file-item:active { cursor: grabbing; }
+.file-item.drag-over-item { border-color: var(--brand-blue); background: rgba(59,130,246,0.05); }
+.file-item-icon { font-size: 18px; flex-shrink: 0; }
+.file-item-name { flex: 1; font-weight: 500; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-item-size { font-size: 11px; color: var(--text-muted); flex-shrink: 0; }
+.file-item-remove { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 2px; border-radius: 4px; display: flex; align-items: center; }
+.file-item-remove:hover { color: var(--error); background: rgba(239,68,68,0.08); }
+
+/* ============================================================
+   THUMBNAIL GRID
+============================================================ */
+.thumb-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+.thumb-card {
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--surface);
+  cursor: grab;
+  transition: all 0.18s;
+  position: relative;
+  user-select: none;
+}
+.thumb-card:hover { border-color: var(--brand-blue); box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.thumb-card.selected { border-color: var(--brand-indigo); box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
+.thumb-card.deleted { opacity: 0.35; border-color: var(--error); }
+.thumb-card.drag-over-thumb { border-color: var(--brand-cyan); background: rgba(6,182,212,0.05); }
+.thumb-canvas-wrap {
+  width: 100%; aspect-ratio: 3/4;
+  background: var(--surface-3);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.thumb-canvas-wrap canvas { max-width: 100%; max-height: 100%; object-fit: contain; }
+.thumb-footer {
+  padding: 6px 8px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+.thumb-page-num { font-size: 10px; font-weight: 700; color: var(--text-muted); }
+.thumb-actions { display: flex; gap: 3px; }
+.thumb-action-btn {
+  width: 22px; height: 22px;
+  border-radius: 5px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 11px;
+}
+.thumb-action-btn:hover { background: var(--surface-3); color: var(--text-primary); }
+.thumb-action-btn.danger:hover { background: rgba(239,68,68,0.1); color: var(--error); }
+.thumb-action-btn.restore:hover { background: rgba(16,185,129,0.1); color: var(--success); }
+.thumb-deleted-overlay {
+  position: absolute; inset: 0;
+  background: rgba(239,68,68,0.08);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; color: var(--error);
+  letter-spacing: 0.05em; text-transform: uppercase;
+  pointer-events: none;
+}
+
+/* ============================================================
+   PREVIEW PANEL
+============================================================ */
+.preview-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.preview-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+  background: var(--surface-2);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.preview-title { font-size: 13px; font-weight: 700; color: var(--text-secondary); flex: 1; }
+.preview-controls { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.preview-page-info { font-size: 12px; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+.preview-body {
+  padding: 20px;
+  display: flex; flex-direction: column; align-items: center; gap: 16px;
+  min-height: 400px;
+  background: #f0f4f8;
+  position: relative;
+}
+#preview-canvas-wrap {
+  position: relative;
+  display: inline-block;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: crosshair;
+  background: white;
+}
+#preview-canvas { display: block; }
+#redact-overlay {
+  position: absolute; inset: 0;
+  pointer-events: none;
+}
+#redact-draw-layer {
+  position: absolute; inset: 0;
+  pointer-events: all;
+}
+.redact-rect {
+  position: absolute;
+  background: black;
+  pointer-events: none;
+}
+.redact-rect-drawing {
+  position: absolute;
+  background: rgba(0,0,0,0.7);
+  border: 2px solid #000;
+  pointer-events: none;
+}
+.preview-empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 12px; color: var(--text-muted); padding: 60px 20px; text-align: center;
+}
+.preview-empty-icon { font-size: 48px; opacity: 0.4; }
+.preview-empty-text { font-size: 14px; font-weight: 500; }
+
+/* ============================================================
+   ROTATION BADGE
+============================================================ */
+.rotation-badge {
+  position: absolute; top: 4px; right: 4px;
+  background: rgba(99,102,241,0.85);
+  color: white; font-size: 9px; font-weight: 700;
+  padding: 2px 5px; border-radius: 4px;
+  pointer-events: none;
+}
+
+/* ============================================================
+   SEO ARTICLE
+============================================================ */
+#seo-section {
+  max-width: 1400px; margin: 0 auto; padding: 40px 24px;
+}
+.seo-article {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 48px;
+  box-shadow: var(--shadow-sm);
+}
+@media (max-width: 640px) { .seo-article { padding: 24px; } }
+.seo-article h2 {
+  font-size: 26px; font-weight: 800; color: var(--text-primary);
+  margin-bottom: 12px; margin-top: 32px; line-height: 1.2;
+}
+.seo-article h2:first-child { margin-top: 0; }
+.seo-article h3 { font-size: 18px; font-weight: 700; color: var(--text-primary); margin: 24px 0 8px; }
+.seo-article p { color: var(--text-secondary); line-height: 1.75; margin-bottom: 14px; font-size: 15px; }
+.seo-article ul { padding-left: 20px; margin-bottom: 14px; }
+.seo-article li { color: var(--text-secondary); line-height: 1.75; margin-bottom: 4px; font-size: 15px; }
+.seo-article strong { color: var(--text-primary); font-weight: 700; }
+
+/* ============================================================
+   FAQ
+============================================================ */
+.faq-list { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+.faq-item {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.faq-question {
+  width: 100%; text-align: left;
+  padding: 16px 20px;
+  background: var(--surface-2);
+  border: none; cursor: pointer;
+  font-size: 15px; font-weight: 600; color: var(--text-primary);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  transition: background 0.18s;
+}
+.faq-question:hover { background: var(--surface-3); }
+.faq-question .faq-chevron { flex-shrink: 0; transition: transform 0.25s; color: var(--text-muted); }
+.faq-question.open .faq-chevron { transform: rotate(180deg); }
+.faq-answer {
+  padding: 0 20px;
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s;
+  font-size: 14px; color: var(--text-secondary); line-height: 1.7;
+  background: var(--surface);
+}
+.faq-answer.open { max-height: 300px; padding: 16px 20px; }
+
+/* ============================================================
+   FOOTER
+============================================================ */
+#site-footer {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 32px 24px;
+  text-align: center;
+}
+.footer-inner { max-width: 1400px; margin: 0 auto; }
+.footer-brand {
+  font-size: 20px; font-weight: 900;
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+.footer-tagline { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+.footer-links { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; }
+.footer-links a { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+.footer-links a:hover { color: var(--brand-blue); }
+.footer-copy { font-size: 12px; color: var(--text-muted); }
+.footer-security {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(16,185,129,0.06);
+  border: 1px solid rgba(16,185,129,0.15);
+  border-radius: 100px;
+  padding: 5px 14px;
+  font-size: 11px; font-weight: 700; color: #059669;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+/* ============================================================
+   UTILITIES
+============================================================ */
+.hidden { display: none !important; }
+.mt-8 { margin-top: 8px; }
+.mt-12 { margin-top: 12px; }
+.mt-16 { margin-top: 16px; }
+.mt-20 { margin-top: 20px; }
+.mb-8 { margin-bottom: 8px; }
+.mb-12 { margin-bottom: 12px; }
+.section-divider { height: 1px; background: var(--border); margin: 20px 0; }
+.badge {
+  display: inline-flex; align-items: center;
+  padding: 2px 8px; border-radius: 100px;
+  font-size: 11px; font-weight: 700;
+}
+.badge-blue { background: rgba(59,130,246,0.1); color: var(--brand-blue); }
+.badge-green { background: rgba(16,185,129,0.1); color: var(--success); }
+.badge-purple { background: rgba(139,92,246,0.1); color: var(--brand-purple); }
+.spinner {
+  width: 18px; height: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-overlay {
+  position: absolute; inset: 0;
+  background: rgba(255,255,255,0.85);
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-lg);
+  z-index: 10;
+  gap: 10px;
+  font-size: 14px; font-weight: 600; color: var(--text-secondary);
+}
+.loading-spinner {
+  width: 24px; height: 24px;
+  border: 3px solid var(--border);
+  border-top-color: var(--brand-blue);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+.separator { display: flex; align-items: center; gap: 12px; margin: 16px 0; }
+.separator::before, .separator::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.separator span { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     HEADER
+============================================================ -->
+<header id="site-header">
+  <div class="header-inner">
+    <a href="https://pratix.io" class="header-brand" title="Pratix.io">
+      <div class="brand-logo">P</div>
+      <div class="brand-text">
+        <span class="brand-name">Pratix.io</span>
+        <span class="brand-sub">Premium Web Tools</span>
+      </div>
+    </a>
+    <div class="header-divider"></div>
+    <div class="header-product">
+      <span class="header-product-name" data-i18n="headerProductName">PDF Toolkit</span>
+      <span class="header-product-sub" data-i18n="headerProductSub">Browser-Based PDF Editor</span>
+    </div>
+    <div class="header-spacer"></div>
+    <a href="https://pratix.io" class="header-back-link" title="Back to Pratix.io">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      <span data-i18n="backLink">Back to Pratix.io</span>
+    </a>
+    <select id="languageSelect" class="lang-select" aria-label="Language">
+      <option value="en">🌐 EN</option>
+      <option value="tr">🇹🇷 TR</option>
+      <option value="de">🇩🇪 DE</option>
+      <option value="fr">🇫🇷 FR</option>
+      <option value="es">🇪🇸 ES</option>
+      <option value="it">🇮🇹 IT</option>
+      <option value="nl">🇳🇱 NL</option>
+      <option value="sv">🇸🇪 SV</option>
+      <option value="da">🇩🇰 DA</option>
+      <option value="no">🇳🇴 NO</option>
+      <option value="fi">🇫🇮 FI</option>
+      <option value="zh">🇨🇳 ZH</option>
+    </select>
+  </div>
+</header>
+
+<!-- ============================================================
+     HERO
+============================================================ -->
+<section id="hero">
+  <div class="hero-badge">
+    <span class="hero-badge-dot"></span>
+    <span data-i18n="heroBadge">100% Client-Side · No Uploads · Privacy-First</span>
+  </div>
+  <h1 class="hero-title">
+    <span data-i18n="heroTitle1">Private, fast and</span><br/>
+    <span class="gradient-text" data-i18n="heroTitle2">browser-based PDF editing</span>
+  </h1>
+  <p class="hero-desc" data-i18n="heroDesc">
+    Merge, split, rotate, reorder, redact and convert PDF files — all inside your browser. Your files never leave your device.
+  </p>
+  <div class="hero-pills">
+    <span class="hero-pill"><span class="pill-icon">🔀</span><span data-i18n="pillMerge">Merge</span></span>
+    <span class="hero-pill"><span class="pill-icon">✂️</span><span data-i18n="pillSplit">Split</span></span>
+    <span class="hero-pill"><span class="pill-icon">🔄</span><span data-i18n="pillRotate">Rotate</span></span>
+    <span class="hero-pill"><span class="pill-icon">🗑️</span><span data-i18n="pillDelete">Delete Pages</span></span>
+    <span class="hero-pill"><span class="pill-icon">↕️</span><span data-i18n="pillReorder">Reorder</span></span>
+    <span class="hero-pill"><span class="pill-icon">🖼️</span><span data-i18n="pillImages">Images→PDF</span></span>
+    <span class="hero-pill"><span class="pill-icon">🧹</span><span data-i18n="pillMeta">Metadata</span></span>
+    <span class="hero-pill"><span class="pill-icon">👁️</span><span data-i18n="pillViewer">Viewer</span></span>
+    <span class="hero-pill"><span class="pill-icon">⬛</span><span data-i18n="pillRedact">Redact</span></span>
+  </div>
+  <div style="margin-top:24px;">
+    <div class="privacy-banner">
+      <span class="privacy-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span data-i18n="privacyFiles">Files stay in your browser</span>
+      </span>
+      <span class="privacy-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+        <span data-i18n="privacyNoUpload">No server uploads</span>
+      </span>
+      <span class="privacy-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+        <span data-i18n="privacyNoAccount">No account required</span>
+      </span>
+      <span class="privacy-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <span data-i18n="privacyGDPR">GDPR &amp; KVKK Friendly</span>
+      </span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     TOP AD
+============================================================ -->
+<div class="ad-top-wrap">
+  <div id="ad-top" class="ad-slot ad-leaderboard">
+    Advertisement · Leaderboard 970×90 / Mobile 320×100
+  </div>
+</div>
+
+<!-- ============================================================
+     WORKSPACE
+============================================================ -->
+<div class="workspace">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-card">
+      <div class="sidebar-title" data-i18n="sidebarTools">PDF Tools</div>
+      <div class="tool-list" id="toolList">
+        <!-- rendered by JS -->
+      </div>
+    </div>
+    <!-- SIDEBAR AD -->
+    <div id="ad-sidebar" class="ad-slot ad-native">
+      Advertisement · Native / Rectangle
+    </div>
+  </aside>
+
+  <!-- MAIN PANEL -->
+  <main class="main-panel" id="mainPanel">
+    <!-- Tool panels rendered by JS -->
+  </main>
+</div>
+
+<!-- ============================================================
+     SEO ARTICLE
+============================================================ -->
+<section id="seo-section">
+  <div class="seo-article">
+    <h2 data-i18n="seoH1">Private, Fast and Browser-Based PDF Editing</h2>
+    <p data-i18n="seoP1">Pratix PDF Toolkit is a free, professional-grade PDF editor that runs entirely inside your web browser. Unlike traditional PDF editors or cloud services, Pratix never uploads your files to any server. Every operation — merging, splitting, rotating, reordering, redacting — happens locally on your device using modern browser APIs.</p>
+    <h3 data-i18n="seoH2">Why Client-Side PDF Processing Matters</h3>
+    <p data-i18n="seoP2">When you upload a PDF to a cloud service, your sensitive documents travel across the internet and are stored on third-party servers. With Pratix PDF Toolkit, your files never leave your browser tab. This is especially important for legal documents, financial records, medical files, and any confidential business content.</p>
+    <h3 data-i18n="seoH3">What You Can Do</h3>
+    <ul>
+      <li data-i18n="seoLi1"><strong>PDF Merge:</strong> Combine multiple PDF files into one document in any order you choose.</li>
+      <li data-i18n="seoLi2"><strong>PDF Split:</strong> Extract a specific page range from a PDF into a new file.</li>
+      <li data-i18n="seoLi3"><strong>PDF Rotate:</strong> Rotate individual pages or all pages by 90°, 180°, or 270°.</li>
+      <li data-i18n="seoLi4"><strong>Page Delete:</strong> Remove unwanted pages visually and download the cleaned PDF.</li>
+      <li data-i18n="seoLi5"><strong>Page Reorder:</strong> Drag and drop PDF pages into any order you need.</li>
+      <li data-i18n="seoLi6"><strong>Images to PDF:</strong> Convert JPG and PNG images into a single PDF document.</li>
+      <li data-i18n="seoLi7"><strong>Metadata Cleaner:</strong> Strip author, title, keywords, and creator metadata from PDF files.</li>
+      <li data-i18n="seoLi8"><strong>PDF Viewer:</strong> View any PDF with zoom, page navigation, and thumbnails.</li>
+      <li data-i18n="seoLi9"><strong>Visual Redaction:</strong> Draw black rectangles over sensitive areas and permanently embed them into the PDF.</li>
+    </ul>
+    <h3 data-i18n="seoH4">What Is Not Included — and Why</h3>
+    <p data-i18n="seoP3">Some PDF operations are intentionally excluded from this toolkit because they cannot be performed reliably or safely in a browser environment:</p>
+    <ul>
+      <li data-i18n="seoLi10"><strong>OCR (Optical Character Recognition):</strong> Requires heavy ML models that are impractical to run client-side at production quality.</li>
+      <li data-i18n="seoLi11"><strong>Password Remove / Crack:</strong> Removing encryption from a PDF you do not own is a legal and ethical issue. We do not support this.</li>
+      <li data-i18n="seoLi12"><strong>Office Conversion (Word/Excel/PowerPoint):</strong> These formats require complex server-side rendering pipelines that cannot be replicated in a browser.</li>
+      <li data-i18n="seoLi13"><strong>Server-Side Compression:</strong> Deep PDF compression (e.g. re-encoding fonts and images) requires server processing. Our toolkit offers basic save optimization only.</li>
+    </ul>
+    <div id="ad-inarticle" class="ad-slot ad-inarticle" style="margin:32px 0;">
+      Advertisement · In-Article
+    </div>
+    <h2 data-i18n="seoFaqTitle">Frequently Asked Questions</h2>
+    <div class="faq-list" id="faqList">
+      <!-- rendered by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FOOTER AD
+============================================================ -->
+<div class="ad-top-wrap">
+  <div id="ad-footer" class="ad-slot ad-footer">
+    Advertisement · Footer Leaderboard
+  </div>
+</div>
+
+<!-- ============================================================
+     FOOTER
+============================================================ -->
+<footer id="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">Pratix.io</div>
+    <div class="footer-tagline" data-i18n="footerTagline">Premium Web Tools — Free, Fast, Private</div>
+    <div class="footer-security">
+      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <span data-i18n="footerSecurity">All tools run client-side securely</span>
+    </div>
+    <div class="footer-links">
+      <a href="https://pratix.io" data-i18n="footerHome">Home</a>
+      <a href="https://pratix.io" data-i18n="footerTools">All Tools</a>
+      <a href="https://pratix.io" data-i18n="footerPrivacy">Privacy Policy</a>
+    </div>
+    <div class="footer-copy" data-i18n="footerCopy">© 2026 Pratix.io — All rights reserved.</div>
+  </div>
+</footer>
+<script>
+/* ============================================================
+   CDN WORKER
+============================================================ */
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+/* ============================================================
+   TOOL DEFINITIONS
+============================================================ */
+const TOOLS = [
+  { id:"merge",    icon:"🔀", i18nName:"toolMergeName",   i18nDesc:"toolMergeDesc"   },
+  { id:"split",    icon:"✂️", i18nName:"toolSplitName",   i18nDesc:"toolSplitDesc"   },
+  { id:"rotate",   icon:"🔄", i18nName:"toolRotateName",  i18nDesc:"toolRotateDesc"  },
+  { id:"delete",   icon:"🗑️", i18nName:"toolDeleteName",  i18nDesc:"toolDeleteDesc"  },
+  { id:"reorder",  icon:"↕️", i18nName:"toolReorderName", i18nDesc:"toolReorderDesc" },
+  { id:"images",   icon:"🖼️", i18nName:"toolImagesName",  i18nDesc:"toolImagesDesc"  },
+  { id:"metadata", icon:"🧹", i18nName:"toolMetaName",    i18nDesc:"toolMetaDesc"    },
+  { id:"viewer",   icon:"👁️", i18nName:"toolViewerName",  i18nDesc:"toolViewerDesc"  },
+  { id:"redact",   icon:"⬛", i18nName:"toolRedactName",  i18nDesc:"toolRedactDesc"  },
+];
+
+/* ============================================================
+   i18n DICTIONARY
+============================================================ */
+const TRANSLATIONS = {
+  en: {
+    headerProductName:"PDF Toolkit", headerProductSub:"Browser-Based PDF Editor",
+    backLink:"Back to Pratix.io",
+    heroBadge:"100% Client-Side · No Uploads · Privacy-First",
+    heroTitle1:"Private, fast and", heroTitle2:"browser-based PDF editing",
+    heroDesc:"Merge, split, rotate, reorder, redact and convert PDF files — all inside your browser. Your files never leave your device.",
+    pillMerge:"Merge", pillSplit:"Split", pillRotate:"Rotate", pillDelete:"Delete Pages",
+    pillReorder:"Reorder", pillImages:"Images→PDF", pillMeta:"Metadata",
+    pillViewer:"Viewer", pillRedact:"Redact",
+    privacyFiles:"Files stay in your browser", privacyNoUpload:"No server uploads",
+    privacyNoAccount:"No account required", privacyGDPR:"GDPR & KVKK Friendly",
+    sidebarTools:"PDF Tools",
+    toolMergeName:"PDF Merge",    toolMergeDesc:"Combine multiple PDFs into one",
+    toolSplitName:"PDF Split",    toolSplitDesc:"Extract a page range to new PDF",
+    toolRotateName:"PDF Rotate",  toolRotateDesc:"Rotate pages by 90°, 180°, 270°",
+    toolDeleteName:"Delete Pages",toolDeleteDesc:"Remove unwanted pages visually",
+    toolReorderName:"Reorder Pages",toolReorderDesc:"Drag & drop pages into new order",
+    toolImagesName:"Images to PDF",toolImagesDesc:"Convert JPG/PNG images to PDF",
+    toolMetaName:"Metadata Cleaner",toolMetaDesc:"Strip PDF metadata & author info",
+    toolViewerName:"PDF Viewer",  toolViewerDesc:"View PDF with zoom & navigation",
+    toolRedactName:"Visual Redaction",toolRedactDesc:"Draw black boxes over sensitive areas",
+    btnDownload:"Download PDF", btnProcess:"Process", btnClear:"Clear",
+    btnAddFiles:"Add Files", btnSelectPDF:"Select PDF", btnSelectImages:"Select Images",
+    dropPDF:"Drop PDF here or click to select",
+    dropPDFs:"Drop PDF files here or click to select",
+    dropImages:"Drop images here or click to select",
+    dropSub:"Supports", selectedFile:"Selected file", selectedFiles:"Selected files",
+    pageCount:"pages",
+    mergeTitle:"PDF Merge", mergeDesc:"Combine multiple PDF files into one document",
+    mergeHint:"Add at least 2 PDF files. Drag rows to reorder.",
+    mergeBtnProcess:"Merge PDFs",
+    splitTitle:"PDF Split", splitDesc:"Extract a page range from a PDF",
+    splitFrom:"From page", splitTo:"To page",
+    splitHint:"Enter the page range to extract",
+    splitBtnProcess:"Split PDF",
+    rotateTitle:"PDF Rotate", rotateDesc:"Rotate pages in a PDF document",
+    rotatePages:"Pages to rotate", rotateAllPages:"All pages",
+    rotateSpecific:"Specific pages (e.g. 1,3,5-8)",
+    rotateAngle:"Rotation angle",
+    rotateBtnProcess:"Rotate & Download",
+    deleteTitle:"Delete Pages", deleteDesc:"Remove unwanted pages from a PDF",
+    deleteHint:"Click Remove on any page. Deleted pages are marked in red.",
+    deleteBtnProcess:"Download Without Deleted Pages",
+    reorderTitle:"Reorder Pages", reorderDesc:"Drag and drop pages into a new order",
+    reorderHint:"Drag thumbnails to reorder. Then download the new PDF.",
+    reorderBtnProcess:"Download Reordered PDF",
+    imagesTitle:"Images to PDF", imagesDesc:"Convert JPG/PNG images into a PDF document",
+    imagesHint:"Add images, drag to reorder. Each image becomes one page.",
+    imagesBtnProcess:"Convert to PDF",
+    metaTitle:"Metadata Cleaner", metaDesc:"Strip or replace PDF metadata",
+    metaSetProducer:"Set producer to Pratix.io",
+    metaBtnProcess:"Clean & Download",
+    viewerTitle:"PDF Viewer", viewerDesc:"View PDF with navigation and zoom",
+    viewerPage:"Page", viewerOf:"of", viewerZoomIn:"Zoom In", viewerZoomOut:"Zoom Out",
+    redactTitle:"Visual Redaction", redactDesc:"Draw black boxes over sensitive content",
+    redactWarning:"⚠️ This is visual redaction only. Black rectangles are drawn over selected areas. Underlying text/data may still exist in the PDF structure. For legally binding redaction, use a certified tool.",
+    redactHint:"Click and drag on the preview to draw a redaction box.",
+    redactClear:"Clear Redactions on This Page",
+    redactBtnProcess:"Apply Redactions & Download",
+    previewTitle:"Live Preview",
+    previewEmpty:"Select a tool and load a PDF to see a preview here.",
+    previewPage:"Page", previewOf:"of",
+    statusNoPDF:"Please select a PDF file first.",
+    statusNoPDFs:"Please select at least 2 PDF files.",
+    statusNoImages:"Please select at least one image.",
+    statusInvalidRange:"Invalid page range. Please check your input.",
+    statusAllDeleted:"Cannot delete all pages. At least one page must remain.",
+    statusProcessing:"Processing…",
+    statusSuccess:"Done! Your file is downloading.",
+    statusErrorEncrypted:"This PDF appears to be encrypted or corrupted.",
+    statusErrorGeneral:"An error occurred. Please try again.",
+    statusLargeFile:"Large file detected. Processing may take a moment.",
+    statusNoRedactions:"No redaction areas drawn. Please draw at least one box.",
+    footerTagline:"Premium Web Tools — Free, Fast, Private",
+    footerSecurity:"All tools run client-side securely",
+    footerHome:"Home", footerTools:"All Tools", footerPrivacy:"Privacy Policy",
+    footerCopy:"© 2026 Pratix.io — All rights reserved.",
+    seoH1:"Private, Fast and Browser-Based PDF Editing",
+    seoP1:"Pratix PDF Toolkit is a free, professional-grade PDF editor that runs entirely inside your web browser. Unlike traditional PDF editors or cloud services, Pratix never uploads your files to any server.",
+    seoH2:"Why Client-Side PDF Processing Matters",
+    seoP2:"When you upload a PDF to a cloud service, your sensitive documents travel across the internet and are stored on third-party servers. With Pratix PDF Toolkit, your files never leave your browser tab.",
+    seoH3:"What You Can Do",
+    seoLi1:"PDF Merge: Combine multiple PDF files into one document in any order you choose.",
+    seoLi2:"PDF Split: Extract a specific page range from a PDF into a new file.",
+    seoLi3:"PDF Rotate: Rotate individual pages or all pages by 90°, 180°, or 270°.",
+    seoLi4:"Page Delete: Remove unwanted pages visually and download the cleaned PDF.",
+    seoLi5:"Page Reorder: Drag and drop PDF pages into any order you need.",
+    seoLi6:"Images to PDF: Convert JPG and PNG images into a single PDF document.",
+    seoLi7:"Metadata Cleaner: Strip author, title, keywords, and creator metadata from PDF files.",
+    seoLi8:"PDF Viewer: View any PDF with zoom, page navigation, and thumbnails.",
+    seoLi9:"Visual Redaction: Draw black rectangles over sensitive areas and permanently embed them.",
+    seoH4:"What Is Not Included — and Why",
+    seoP3:"Some PDF operations are intentionally excluded because they cannot be performed reliably in a browser:",
+    seoLi10:"OCR: Requires heavy ML models impractical for client-side use.",
+    seoLi11:"Password Remove / Crack: Legal and ethical issues prevent us from supporting this.",
+    seoLi12:"Office Conversion: Word/Excel/PowerPoint require server-side rendering pipelines.",
+    seoLi13:"Server-Side Compression: Deep compression requires server processing.",
+    seoFaqTitle:"Frequently Asked Questions",
+    faqQ1:"Are my PDF files uploaded to a server?",
+    faqA1:"No. All processing happens entirely inside your browser using JavaScript. Your files never leave your device. There is no server, no database, and no account required.",
+    faqQ2:"Can I reorder pages visually?",
+    faqA2:"Yes. In the Reorder Pages tool, all pages are shown as draggable thumbnails. Simply drag them into the order you want, then click Download.",
+    faqQ3:"Can I select redaction areas manually?",
+    faqA3:"Yes. In the Visual Redaction tool, click and drag on the page preview to draw black boxes over any area. Multiple boxes can be drawn per page. They are permanently embedded when you download.",
+    faqQ4:"Why are OCR and password removal tools not included?",
+    faqA4:"OCR requires large machine-learning models that are not practical to run in a browser at production quality. Password removal raises serious legal and ethical concerns. Neither feature can be implemented responsibly as a client-side tool.",
+  },
+  tr: {
+    headerProductName:"PDF Araç Seti", headerProductSub:"Tarayıcı Tabanlı PDF Düzenleyici",
+    backLink:"Pratix.io'ya Dön",
+    heroBadge:"100% İstemci Taraflı · Yükleme Yok · Gizlilik Öncelikli",
+    heroTitle1:"Özel, hızlı ve", heroTitle2:"tarayıcı tabanlı PDF düzenleme",
+    heroDesc:"PDF dosyalarını tarayıcınızda birleştirin, bölün, döndürün, yeniden sıralayın ve karartın. Dosyalarınız cihazınızı asla terk etmez.",
+    pillMerge:"Birleştir", pillSplit:"Böl", pillRotate:"Döndür", pillDelete:"Sayfa Sil",
+    pillReorder:"Yeniden Sırala", pillImages:"Görsel→PDF", pillMeta:"Metadata",
+    pillViewer:"Görüntüleyici", pillRedact:"Karart",
+    privacyFiles:"Dosyalar tarayıcınızda kalır", privacyNoUpload:"Sunucuya yükleme yok",
+    privacyNoAccount:"Hesap gerekmez", privacyGDPR:"GDPR ve KVKK Uyumlu",
+    sidebarTools:"PDF Araçları",
+    toolMergeName:"PDF Birleştir",    toolMergeDesc:"Birden fazla PDF'i tek dosyada birleştir",
+    toolSplitName:"PDF Böl",          toolSplitDesc:"Belirli sayfa aralığını yeni PDF olarak çıkar",
+    toolRotateName:"PDF Döndür",      toolRotateDesc:"Sayfaları 90°, 180°, 270° döndür",
+    toolDeleteName:"Sayfa Sil",       toolDeleteDesc:"İstenmeyen sayfaları görsel olarak kaldır",
+    toolReorderName:"Sayfa Sırala",   toolReorderDesc:"Sayfaları sürükle-bırak ile yeniden sırala",
+    toolImagesName:"Görsel → PDF",    toolImagesDesc:"JPG/PNG görsellerini PDF'e dönüştür",
+    toolMetaName:"Metadata Temizle",  toolMetaDesc:"PDF metadata ve yazar bilgisini temizle",
+    toolViewerName:"PDF Görüntüleyici",toolViewerDesc:"Zoom ve sayfa gezintisi ile PDF görüntüle",
+    toolRedactName:"Görsel Karartma", toolRedactDesc:"Hassas alanlara siyah kutu çiz",
+    btnDownload:"PDF İndir", btnProcess:"İşle", btnClear:"Temizle",
+    btnAddFiles:"Dosya Ekle", btnSelectPDF:"PDF Seç", btnSelectImages:"Görsel Seç",
+    dropPDF:"PDF'i buraya sürükle veya seçmek için tıkla",
+    dropPDFs:"PDF dosyalarını buraya sürükle veya seçmek için tıkla",
+    dropImages:"Görselleri buraya sürükle veya seçmek için tıkla",
+    dropSub:"Desteklenen", selectedFile:"Seçilen dosya", selectedFiles:"Seçilen dosyalar",
+    pageCount:"sayfa",
+    mergeTitle:"PDF Birleştir", mergeDesc:"Birden fazla PDF dosyasını tek belgede birleştir",
+    mergeHint:"En az 2 PDF ekleyin. Sıralamak için satırları sürükleyin.",
+    mergeBtnProcess:"PDF'leri Birleştir",
+    splitTitle:"PDF Böl", splitDesc:"PDF'den sayfa aralığı çıkar",
+    splitFrom:"Başlangıç sayfası", splitTo:"Bitiş sayfası",
+    splitHint:"Çıkarılacak sayfa aralığını girin",
+    splitBtnProcess:"PDF'i Böl",
+    rotateTitle:"PDF Döndür", rotateDesc:"PDF'deki sayfaları döndür",
+    rotatePages:"Döndürülecek sayfalar", rotateAllPages:"Tüm sayfalar",
+    rotateSpecific:"Belirli sayfalar (ör. 1,3,5-8)",
+    rotateAngle:"Döndürme açısı",
+    rotateBtnProcess:"Döndür ve İndir",
+    deleteTitle:"Sayfa Sil", deleteDesc:"PDF'den istenmeyen sayfaları kaldır",
+    deleteHint:"Herhangi bir sayfada Kaldır'a tıklayın. Silinen sayfalar kırmızıyla işaretlenir.",
+    deleteBtnProcess:"Silinen Sayfalar Olmadan İndir",
+    reorderTitle:"Sayfa Sırala", reorderDesc:"Sayfaları yeni bir sıraya sürükle-bırak",
+    reorderHint:"Küçük resimleri sürükleyerek yeniden sıralayın. Ardından yeni PDF'i indirin.",
+    reorderBtnProcess:"Yeniden Sıralanmış PDF'i İndir",
+    imagesTitle:"Görsel → PDF", imagesDesc:"JPG/PNG görsellerini PDF belgesine dönüştür",
+    imagesHint:"Görseller ekleyin, sıralamak için sürükleyin. Her görsel bir sayfa olur.",
+    imagesBtnProcess:"PDF'e Dönüştür",
+    metaTitle:"Metadata Temizle", metaDesc:"PDF metadata bilgilerini temizle veya değiştir",
+    metaSetProducer:"Üreticiyi Pratix.io olarak ayarla",
+    metaBtnProcess:"Temizle ve İndir",
+    viewerTitle:"PDF Görüntüleyici", viewerDesc:"Gezinti ve zoom ile PDF görüntüle",
+    viewerPage:"Sayfa", viewerOf:"/", viewerZoomIn:"Yakınlaştır", viewerZoomOut:"Uzaklaştır",
+    redactTitle:"Görsel Karartma", redactDesc:"Hassas içeriklerin üzerine siyah kutu çiz",
+    redactWarning:"⚠️ Bu yalnızca görsel karartmadır. Seçilen alanlara siyah dikdörtgenler çizilir. Altta yatan metin/veri PDF yapısında hâlâ mevcut olabilir.",
+    redactHint:"Karartma kutusu çizmek için önizleme üzerinde tıklayıp sürükleyin.",
+    redactClear:"Bu Sayfadaki Karartmaları Temizle",
+    redactBtnProcess:"Karartmaları Uygula ve İndir",
+    previewTitle:"Canlı Önizleme",
+    previewEmpty:"Önizleme görmek için bir araç seçin ve PDF yükleyin.",
+    previewPage:"Sayfa", previewOf:"/",
+    statusNoPDF:"Lütfen önce bir PDF dosyası seçin.",
+    statusNoPDFs:"Lütfen en az 2 PDF dosyası seçin.",
+    statusNoImages:"Lütfen en az bir görsel seçin.",
+    statusInvalidRange:"Geçersiz sayfa aralığı. Lütfen girdinizi kontrol edin.",
+    statusAllDeleted:"Tüm sayfalar silinemez. En az bir sayfa kalmalıdır.",
+    statusProcessing:"İşleniyor…",
+    statusSuccess:"Tamamlandı! Dosyanız indiriliyor.",
+    statusErrorEncrypted:"Bu PDF şifreli veya bozuk görünüyor.",
+    statusErrorGeneral:"Bir hata oluştu. Lütfen tekrar deneyin.",
+    statusLargeFile:"Büyük dosya algılandı. İşlem biraz zaman alabilir.",
+    statusNoRedactions:"Karartma alanı çizilmedi. Lütfen en az bir kutu çizin.",
+    footerTagline:"Premium Web Araçları — Ücretsiz, Hızlı, Özel",
+    footerSecurity:"Tüm araçlar istemci tarafında güvenli çalışır",
+    footerHome:"Ana Sayfa", footerTools:"Tüm Araçlar", footerPrivacy:"Gizlilik Politikası",
+    footerCopy:"© 2026 Pratix.io — Tüm hakları saklıdır.",
+    seoH1:"Özel, Hızlı ve Tarayıcı Tabanlı PDF Düzenleme",
+    seoP1:"Pratix PDF Araç Seti, tamamen web tarayıcınızda çalışan ücretsiz, profesyonel düzeyde bir PDF düzenleyicisidir. Geleneksel PDF düzenleyicilerinin veya bulut hizmetlerinin aksine, Pratix dosyalarınızı asla sunucuya yüklemez.",
+    seoH2:"İstemci Taraflı PDF İşlemenin Önemi",
+    seoP2:"Bir PDF'i bulut hizmetine yüklediğinizde, hassas belgeleriniz internet üzerinden seyahat eder ve üçüncü taraf sunucularda depolanır. Pratix PDF Araç Seti ile dosyalarınız tarayıcı sekmenizi asla terk etmez.",
+    seoH3:"Neler Yapabilirsiniz",
+    seoLi1:"PDF Birleştirme: Birden fazla PDF dosyasını istediğiniz sırada tek belgede birleştirin.",
+    seoLi2:"PDF Bölme: PDF'den belirli bir sayfa aralığını yeni bir dosyaya çıkarın.",
+    seoLi3:"PDF Döndürme: Tek tek sayfaları veya tüm sayfaları 90°, 180° veya 270° döndürün.",
+    seoLi4:"Sayfa Silme: İstenmeyen sayfaları görsel olarak kaldırın ve temizlenmiş PDF'i indirin.",
+    seoLi5:"Sayfa Sıralama: PDF sayfalarını ihtiyacınıza göre sürükleyip bırakın.",
+    seoLi6:"Görsel → PDF: JPG ve PNG görsellerini tek bir PDF belgesine dönüştürün.",
+    seoLi7:"Metadata Temizleme: PDF dosyalarından yazar, başlık, anahtar kelime ve oluşturucu bilgilerini silin.",
+    seoLi8:"PDF Görüntüleyici: Zoom, sayfa gezintisi ve küçük resimlerle herhangi bir PDF'i görüntüleyin.",
+    seoLi9:"Görsel Karartma: Hassas alanların üzerine siyah dikdörtgenler çizin ve kalıcı olarak PDF'e gömün.",
+    seoH4:"Dahil Edilmeyenler ve Nedenleri",
+    seoP3:"Bazı PDF işlemleri tarayıcı ortamında güvenilir şekilde gerçekleştirilemediğinden kasıtlı olarak dışarıda bırakılmıştır:",
+    seoLi10:"OCR: İstemci tarafında üretim kalitesinde çalıştırılması pratik olmayan ağır ML modelleri gerektirir.",
+    seoLi11:"Şifre Kaldırma: Sahip olmadığınız bir PDF'in şifrelemesini kaldırmak yasal ve etik sorunlar doğurur.",
+    seoLi12:"Office Dönüşümü: Word/Excel/PowerPoint, tarayıcıda kopyalanamayan sunucu taraflı işlem hatları gerektirir.",
+    seoLi13:"Sunucu Taraflı Sıkıştırma: Derin PDF sıkıştırma sunucu işlemi gerektirir.",
+    seoFaqTitle:"Sıkça Sorulan Sorular",
+    faqQ1:"PDF dosyalarım sunucuya yükleniyor mu?",
+    faqA1:"Hayır. Tüm işlemler JavaScript kullanılarak tamamen tarayıcınızda gerçekleşir. Dosyalarınız cihazınızı asla terk etmez. Sunucu, veritabanı ve hesap gerekmez.",
+    faqQ2:"Sayfaları görsel olarak yeniden sıralayabilir miyim?",
+    faqA2:"Evet. Sayfa Sırala aracında tüm sayfalar sürüklenebilir küçük resimler olarak gösterilir. İstediğiniz sıraya sürükleyin, ardından İndir'e tıklayın.",
+    faqQ3:"Karartma alanlarını manuel olarak seçebilir miyim?",
+    faqA3:"Evet. Görsel Karartma aracında, herhangi bir alanın üzerine siyah kutu çizmek için sayfa önizlemesine tıklayıp sürükleyin. Sayfa başına birden fazla kutu çizilebilir.",
+    faqQ4:"OCR ve şifre kaldırma araçları neden dahil değil?",
+    faqA4:"OCR, tarayıcıda üretim kalitesinde çalıştırılması pratik olmayan büyük makine öğrenmesi modelleri gerektirir. Şifre kaldırma ciddi yasal ve etik endişeler doğurur.",
+  },
+  de: {
+    headerProductName:"PDF-Toolkit", headerProductSub:"Browserbasierter PDF-Editor",
+    backLink:"Zurück zu Pratix.io", heroBadge:"100% Client-seitig · Kein Upload · Datenschutz",
+    heroTitle1:"Privat, schnell und", heroTitle2:"browserbasierte PDF-Bearbeitung",
+    heroDesc:"PDF-Dateien zusammenführen, aufteilen, drehen, neu anordnen und schwärzen — alles im Browser.",
+    sidebarTools:"PDF-Werkzeuge",
+    toolMergeName:"PDF zusammenführen", toolMergeDesc:"Mehrere PDFs zu einer Datei zusammenführen",
+    toolSplitName:"PDF aufteilen", toolSplitDesc:"Seitenbereich als neue PDF extrahieren",
+    toolRotateName:"PDF drehen", toolRotateDesc:"Seiten um 90°, 180°, 270° drehen",
+    toolDeleteName:"Seiten löschen", toolDeleteDesc:"Unerwünschte Seiten visuell entfernen",
+    toolReorderName:"Seiten neu anordnen", toolReorderDesc:"Seiten per Drag & Drop neu ordnen",
+    toolImagesName:"Bilder zu PDF", toolImagesDesc:"JPG/PNG-Bilder in PDF konvertieren",
+    toolMetaName:"Metadaten bereinigen", toolMetaDesc:"PDF-Metadaten entfernen",
+    toolViewerName:"PDF-Viewer", toolViewerDesc:"PDF mit Zoom und Navigation anzeigen",
+    toolRedactName:"Visuelle Schwärzung", toolRedactDesc:"Schwarze Boxen über sensible Bereiche zeichnen",
+    btnDownload:"PDF herunterladen", btnProcess:"Verarbeiten", btnClear:"Löschen",
+    dropPDF:"PDF hier ablegen oder klicken", dropPDFs:"PDF-Dateien hier ablegen oder klicken",
+    dropImages:"Bilder hier ablegen oder klicken",
+    statusNoPDF:"Bitte zuerst eine PDF-Datei auswählen.",
+    statusNoPDFs:"Bitte mindestens 2 PDF-Dateien auswählen.",
+    statusNoImages:"Bitte mindestens ein Bild auswählen.",
+    statusInvalidRange:"Ungültiger Seitenbereich.",
+    statusAllDeleted:"Nicht alle Seiten können gelöscht werden.",
+    statusProcessing:"Verarbeitung…", statusSuccess:"Fertig! Ihre Datei wird heruntergeladen.",
+    statusErrorEncrypted:"Diese PDF scheint verschlüsselt oder beschädigt zu sein.",
+    statusErrorGeneral:"Ein Fehler ist aufgetreten. Bitte erneut versuchen.",
+    previewTitle:"Vorschau", previewEmpty:"Werkzeug auswählen und PDF laden.",
+    footerTagline:"Premium-Webtools — Kostenlos, Schnell, Privat",
+    footerSecurity:"Alle Tools laufen clientseitig sicher",
+    footerCopy:"© 2026 Pratix.io — Alle Rechte vorbehalten.",
+    mergeBtnProcess:"PDFs zusammenführen", splitBtnProcess:"PDF aufteilen",
+    rotateBtnProcess:"Drehen & Herunterladen", deleteBtnProcess:"Ohne gelöschte Seiten herunterladen",
+    reorderBtnProcess:"Neu geordnete PDF herunterladen", imagesBtnProcess:"In PDF konvertieren",
+    metaBtnProcess:"Bereinigen & Herunterladen", redactBtnProcess:"Schwärzungen anwenden & herunterladen",
+    seoFaqTitle:"Häufig gestellte Fragen",
+    faqQ1:"Werden meine PDF-Dateien auf einen Server hochgeladen?",
+    faqA1:"Nein. Die gesamte Verarbeitung erfolgt in Ihrem Browser. Ihre Dateien verlassen Ihr Gerät nie.",
+    faqQ2:"Kann ich Seiten visuell neu anordnen?",
+    faqA2:"Ja. Im Werkzeug 'Seiten neu anordnen' können Sie Miniaturansichten per Drag & Drop verschieben.",
+    faqQ3:"Kann ich Schwärzungsbereiche manuell auswählen?",
+    faqA3:"Ja. Im Schwärzungswerkzeug können Sie Boxen auf der Seitenvorschau zeichnen.",
+    faqQ4:"Warum sind OCR und Passwortentfernung nicht enthalten?",
+    faqA4:"OCR erfordert große ML-Modelle. Passwortentfernung wirft rechtliche und ethische Fragen auf.",
+  },
+  fr: {
+    headerProductName:"Boîte à outils PDF", headerProductSub:"Éditeur PDF basé sur navigateur",
+    backLink:"Retour à Pratix.io", heroBadge:"100% Côté client · Pas d'upload · Confidentialité",
+    heroTitle1:"Édition PDF privée,", heroTitle2:"rapide et dans le navigateur",
+    heroDesc:"Fusionnez, divisez, faites pivoter, réorganisez et expurgez des fichiers PDF dans votre navigateur.",
+    sidebarTools:"Outils PDF",
+    toolMergeName:"Fusionner PDF", toolMergeDesc:"Combiner plusieurs PDF en un seul",
+    toolSplitName:"Diviser PDF", toolSplitDesc:"Extraire une plage de pages",
+    toolRotateName:"Faire pivoter PDF", toolRotateDesc:"Faire pivoter les pages de 90°, 180°, 270°",
+    toolDeleteName:"Supprimer des pages", toolDeleteDesc:"Supprimer visuellement les pages indésirables",
+    toolReorderName:"Réorganiser les pages", toolReorderDesc:"Glisser-déposer les pages dans un nouvel ordre",
+    toolImagesName:"Images en PDF", toolImagesDesc:"Convertir JPG/PNG en PDF",
+    toolMetaName:"Nettoyer les métadonnées", toolMetaDesc:"Supprimer les métadonnées PDF",
+    toolViewerName:"Visionneuse PDF", toolViewerDesc:"Afficher un PDF avec zoom et navigation",
+    toolRedactName:"Expurgation visuelle", toolRedactDesc:"Dessiner des boîtes noires sur les zones sensibles",
+    btnDownload:"Télécharger PDF", btnProcess:"Traiter", btnClear:"Effacer",
+    dropPDF:"Déposez le PDF ici ou cliquez", dropPDFs:"Déposez les PDFs ici ou cliquez",
+    dropImages:"Déposez les images ici ou cliquez",
+    statusNoPDF:"Veuillez d'abord sélectionner un fichier PDF.",
+    statusNoPDFs:"Veuillez sélectionner au moins 2 fichiers PDF.",
+    statusNoImages:"Veuillez sélectionner au moins une image.",
+    statusInvalidRange:"Plage de pages invalide.",
+    statusAllDeleted:"Impossible de supprimer toutes les pages.",
+    statusProcessing:"Traitement en cours…", statusSuccess:"Terminé ! Votre fichier est en cours de téléchargement.",
+    statusErrorEncrypted:"Ce PDF semble être chiffré ou corrompu.",
+    statusErrorGeneral:"Une erreur s'est produite. Veuillez réessayer.",
+    previewTitle:"Aperçu en direct", previewEmpty:"Sélectionnez un outil et chargez un PDF.",
+    footerTagline:"Outils Web Premium — Gratuit, Rapide, Privé",
+    footerSecurity:"Tous les outils fonctionnent côté client en toute sécurité",
+    footerCopy:"© 2026 Pratix.io — Tous droits réservés.",
+    mergeBtnProcess:"Fusionner les PDFs", splitBtnProcess:"Diviser le PDF",
+    rotateBtnProcess:"Faire pivoter & Télécharger", deleteBtnProcess:"Télécharger sans pages supprimées",
+    reorderBtnProcess:"Télécharger PDF réorganisé", imagesBtnProcess:"Convertir en PDF",
+    metaBtnProcess:"Nettoyer & Télécharger", redactBtnProcess:"Appliquer les expurgations & Télécharger",
+    seoFaqTitle:"Foire aux questions",
+    faqQ1:"Mes fichiers PDF sont-ils téléchargés sur un serveur ?",
+    faqA1:"Non. Tout le traitement se fait dans votre navigateur. Vos fichiers ne quittent jamais votre appareil.",
+    faqQ2:"Puis-je réorganiser les pages visuellement ?",
+    faqA2:"Oui. Dans l'outil Réorganiser, faites glisser les vignettes dans l'ordre souhaité.",
+    faqQ3:"Puis-je sélectionner manuellement les zones d'expurgation ?",
+    faqA3:"Oui. Dans l'outil d'expurgation, cliquez et faites glisser sur l'aperçu pour dessiner des boîtes.",
+    faqQ4:"Pourquoi l'OCR et la suppression de mot de passe ne sont-ils pas inclus ?",
+    faqA4:"L'OCR nécessite de grands modèles ML. La suppression de mot de passe soulève des problèmes juridiques.",
+  },
+  es: {
+    headerProductName:"Kit de herramientas PDF", headerProductSub:"Editor PDF basado en navegador",
+    backLink:"Volver a Pratix.io", heroBadge:"100% del lado del cliente · Sin carga · Privacidad",
+    heroTitle1:"Edición de PDF privada,", heroTitle2:"rápida y en el navegador",
+    heroDesc:"Combine, divida, gire, reordene y redacte archivos PDF en su navegador.",
+    sidebarTools:"Herramientas PDF",
+    toolMergeName:"Combinar PDF", toolMergeDesc:"Combinar varios PDFs en uno",
+    toolSplitName:"Dividir PDF", toolSplitDesc:"Extraer un rango de páginas",
+    toolRotateName:"Rotar PDF", toolRotateDesc:"Rotar páginas 90°, 180°, 270°",
+    toolDeleteName:"Eliminar páginas", toolDeleteDesc:"Eliminar visualmente páginas no deseadas",
+    toolReorderName:"Reordenar páginas", toolReorderDesc:"Arrastrar y soltar páginas en nuevo orden",
+    toolImagesName:"Imágenes a PDF", toolImagesDesc:"Convertir JPG/PNG a PDF",
+    toolMetaName:"Limpiar metadatos", toolMetaDesc:"Eliminar metadatos del PDF",
+    toolViewerName:"Visor PDF", toolViewerDesc:"Ver PDF con zoom y navegación",
+    toolRedactName:"Redacción visual", toolRedactDesc:"Dibujar cajas negras sobre áreas sensibles",
+    btnDownload:"Descargar PDF", btnProcess:"Procesar", btnClear:"Limpiar",
+    dropPDF:"Suelte el PDF aquí o haga clic", dropPDFs:"Suelte los PDFs aquí o haga clic",
+    dropImages:"Suelte las imágenes aquí o haga clic",
+    statusNoPDF:"Por favor, seleccione primero un archivo PDF.",
+    statusNoPDFs:"Por favor, seleccione al menos 2 archivos PDF.",
+    statusNoImages:"Por favor, seleccione al menos una imagen.",
+    statusInvalidRange:"Rango de páginas no válido.",
+    statusAllDeleted:"No se pueden eliminar todas las páginas.",
+    statusProcessing:"Procesando…", statusSuccess:"¡Listo! Su archivo se está descargando.",
+    statusErrorEncrypted:"Este PDF parece estar cifrado o dañado.",
+    statusErrorGeneral:"Se produjo un error. Por favor, inténtelo de nuevo.",
+    previewTitle:"Vista previa en vivo", previewEmpty:"Seleccione una herramienta y cargue un PDF.",
+    footerTagline:"Herramientas Web Premium — Gratis, Rápido, Privado",
+    footerSecurity:"Todas las herramientas se ejecutan del lado del cliente de forma segura",
+    footerCopy:"© 2026 Pratix.io — Todos los derechos reservados.",
+    mergeBtnProcess:"Combinar PDFs", splitBtnProcess:"Dividir PDF",
+    rotateBtnProcess:"Rotar y Descargar", deleteBtnProcess:"Descargar sin páginas eliminadas",
+    reorderBtnProcess:"Descargar PDF reordenado", imagesBtnProcess:"Convertir a PDF",
+    metaBtnProcess:"Limpiar y Descargar", redactBtnProcess:"Aplicar redacciones y Descargar",
+    seoFaqTitle:"Preguntas frecuentes",
+    faqQ1:"¿Se cargan mis archivos PDF en un servidor?",
+    faqA1:"No. Todo el procesamiento ocurre en su navegador. Sus archivos nunca abandonan su dispositivo.",
+    faqQ2:"¿Puedo reordenar páginas visualmente?",
+    faqA2:"Sí. En la herramienta Reordenar, arrastre las miniaturas al orden deseado.",
+    faqQ3:"¿Puedo seleccionar áreas de redacción manualmente?",
+    faqA3:"Sí. En la herramienta de redacción, haga clic y arrastre sobre la vista previa.",
+    faqQ4:"¿Por qué no se incluyen OCR y eliminación de contraseña?",
+    faqA4:"OCR requiere grandes modelos ML. La eliminación de contraseña plantea problemas legales.",
+  },
+  it: {
+    headerProductName:"Toolkit PDF", headerProductSub:"Editor PDF basato su browser",
+    backLink:"Torna a Pratix.io", heroBadge:"100% lato client · Nessun caricamento · Privacy",
+    heroTitle1:"Modifica PDF privata,", heroTitle2:"veloce e nel browser",
+    heroDesc:"Unisci, dividi, ruota, riordina e oscura file PDF nel tuo browser.",
+    sidebarTools:"Strumenti PDF",
+    toolMergeName:"Unisci PDF", toolMergeDesc:"Combina più PDF in uno",
+    toolSplitName:"Dividi PDF", toolSplitDesc:"Estrai un intervallo di pagine",
+    toolRotateName:"Ruota PDF", toolRotateDesc:"Ruota le pagine di 90°, 180°, 270°",
+    toolDeleteName:"Elimina pagine", toolDeleteDesc:"Rimuovi visivamente le pagine indesiderate",
+    toolReorderName:"Riordina pagine", toolReorderDesc:"Trascina le pagine in un nuovo ordine",
+    toolImagesName:"Immagini in PDF", toolImagesDesc:"Converti JPG/PNG in PDF",
+    toolMetaName:"Pulisci metadati", toolMetaDesc:"Rimuovi i metadati PDF",
+    toolViewerName:"Visualizzatore PDF", toolViewerDesc:"Visualizza PDF con zoom e navigazione",
+    toolRedactName:"Oscuramento visivo", toolRedactDesc:"Disegna riquadri neri sulle aree sensibili",
+    btnDownload:"Scarica PDF", btnProcess:"Elabora", btnClear:"Cancella",
+    dropPDF:"Trascina il PDF qui o clicca", dropPDFs:"Trascina i PDF qui o clicca",
+    dropImages:"Trascina le immagini qui o clicca",
+    statusNoPDF:"Seleziona prima un file PDF.", statusNoPDFs:"Seleziona almeno 2 file PDF.",
+    statusNoImages:"Seleziona almeno un'immagine.", statusInvalidRange:"Intervallo di pagine non valido.",
+    statusAllDeleted:"Non è possibile eliminare tutte le pagine.",
+    statusProcessing:"Elaborazione…", statusSuccess:"Fatto! Il tuo file è in download.",
+    statusErrorEncrypted:"Questo PDF sembra essere crittografato o danneggiato.",
+    statusErrorGeneral:"Si è verificato un errore. Riprova.",
+    previewTitle:"Anteprima live", previewEmpty:"Seleziona uno strumento e carica un PDF.",
+    footerTagline:"Strumenti Web Premium — Gratuiti, Veloci, Privati",
+    footerSecurity:"Tutti gli strumenti funzionano lato client in modo sicuro",
+    footerCopy:"© 2026 Pratix.io — Tutti i diritti riservati.",
+    mergeBtnProcess:"Unisci PDF", splitBtnProcess:"Dividi PDF",
+    rotateBtnProcess:"Ruota e Scarica", deleteBtnProcess:"Scarica senza pagine eliminate",
+    reorderBtnProcess:"Scarica PDF riordinato", imagesBtnProcess:"Converti in PDF",
+    metaBtnProcess:"Pulisci e Scarica", redactBtnProcess:"Applica oscuramenti e Scarica",
+    seoFaqTitle:"Domande frequenti",
+    faqQ1:"I miei file PDF vengono caricati su un server?",
+    faqA1:"No. Tutta l'elaborazione avviene nel browser. I tuoi file non lasciano mai il tuo dispositivo.",
+    faqQ2:"Posso riordinare le pagine visivamente?",
+    faqA2:"Sì. Nello strumento Riordina, trascina le miniature nell'ordine desiderato.",
+    faqQ3:"Posso selezionare manualmente le aree di oscuramento?",
+    faqA3:"Sì. Nello strumento di oscuramento, clicca e trascina sull'anteprima.",
+    faqQ4:"Perché OCR e rimozione password non sono inclusi?",
+    faqA4:"OCR richiede grandi modelli ML. La rimozione della password solleva problemi legali.",
+  },
+  nl: {
+    headerProductName:"PDF Toolkit", headerProductSub:"Browsergebaseerde PDF-editor",
+    backLink:"Terug naar Pratix.io", heroBadge:"100% Client-side · Geen upload · Privacy",
+    heroTitle1:"Privé, snel en", heroTitle2:"browsergebaseerde PDF-bewerking",
+    heroDesc:"PDF-bestanden samenvoegen, splitsen, roteren, herordenen en redigeren in uw browser.",
+    sidebarTools:"PDF-hulpmiddelen",
+    toolMergeName:"PDF samenvoegen", toolMergeDesc:"Meerdere PDF's samenvoegen",
+    toolSplitName:"PDF splitsen", toolSplitDesc:"Paginabereik extraheren",
+    toolRotateName:"PDF roteren", toolRotateDesc:"Pagina's 90°, 180°, 270° roteren",
+    toolDeleteName:"Pagina's verwijderen", toolDeleteDesc:"Ongewenste pagina's visueel verwijderen",
+    toolReorderName:"Pagina's herordenen", toolReorderDesc:"Pagina's slepen naar nieuwe volgorde",
+    toolImagesName:"Afbeeldingen naar PDF", toolImagesDesc:"JPG/PNG naar PDF converteren",
+    toolMetaName:"Metadata opschonen", toolMetaDesc:"PDF-metadata verwijderen",
+    toolViewerName:"PDF-viewer", toolViewerDesc:"PDF bekijken met zoom en navigatie",
+    toolRedactName:"Visuele redactie", toolRedactDesc:"Zwarte vakken tekenen over gevoelige gebieden",
+    btnDownload:"PDF downloaden", btnProcess:"Verwerken", btnClear:"Wissen",
+    dropPDF:"PDF hier neerzetten of klikken", dropPDFs:"PDF-bestanden hier neerzetten of klikken",
+    dropImages:"Afbeeldingen hier neerzetten of klikken",
+    statusNoPDF:"Selecteer eerst een PDF-bestand.", statusNoPDFs:"Selecteer minimaal 2 PDF-bestanden.",
+    statusNoImages:"Selecteer minimaal één afbeelding.", statusInvalidRange:"Ongeldig paginabereik.",
+    statusAllDeleted:"Niet alle pagina's kunnen worden verwijderd.",
+    statusProcessing:"Verwerken…", statusSuccess:"Klaar! Uw bestand wordt gedownload.",
+    statusErrorEncrypted:"Deze PDF lijkt versleuteld of beschadigd.",
+    statusErrorGeneral:"Er is een fout opgetreden. Probeer het opnieuw.",
+    previewTitle:"Live voorbeeld", previewEmpty:"Selecteer een hulpmiddel en laad een PDF.",
+    footerTagline:"Premium webtools — Gratis, Snel, Privé",
+    footerSecurity:"Alle tools draaien veilig aan de clientzijde",
+    footerCopy:"© 2026 Pratix.io — Alle rechten voorbehouden.",
+    mergeBtnProcess:"PDF's samenvoegen", splitBtnProcess:"PDF splitsen",
+    rotateBtnProcess:"Roteren & Downloaden", deleteBtnProcess:"Downloaden zonder verwijderde pagina's",
+    reorderBtnProcess:"Hergeordende PDF downloaden", imagesBtnProcess:"Converteren naar PDF",
+    metaBtnProcess:"Opschonen & Downloaden", redactBtnProcess:"Redacties toepassen & Downloaden",
+    seoFaqTitle:"Veelgestelde vragen",
+    faqQ1:"Worden mijn PDF-bestanden geüpload naar een server?",
+    faqA1:"Nee. Alle verwerking vindt plaats in uw browser. Uw bestanden verlaten uw apparaat nooit.",
+    faqQ2:"Kan ik pagina's visueel herordenen?",
+    faqA2:"Ja. Sleep miniaturen naar de gewenste volgorde in het herordenhulpmiddel.",
+    faqQ3:"Kan ik redactiegebieden handmatig selecteren?",
+    faqA3:"Ja. Klik en sleep op de voorbeeldweergave om vakken te tekenen.",
+    faqQ4:"Waarom zijn OCR en wachtwoordverwijdering niet inbegrepen?",
+    faqA4:"OCR vereist grote ML-modellen. Wachtwoordverwijdering roept juridische vragen op.",
+  },
+  sv: {
+    headerProductName:"PDF-verktyg", headerProductSub:"Webbläsarbaserad PDF-redigerare",
+    backLink:"Tillbaka till Pratix.io", heroBadge:"100% klientsidan · Ingen uppladdning · Integritet",
+    heroTitle1:"Privat, snabb och", heroTitle2:"webbläsarbaserad PDF-redigering",
+    heroDesc:"Slå ihop, dela, rotera, ordna om och redigera PDF-filer i din webbläsare.",
+    sidebarTools:"PDF-verktyg",
+    toolMergeName:"Slå ihop PDF", toolMergeDesc:"Kombinera flera PDF:er till en",
+    toolSplitName:"Dela PDF", toolSplitDesc:"Extrahera ett sidintervall",
+    toolRotateName:"Rotera PDF", toolRotateDesc:"Rotera sidor 90°, 180°, 270°",
+    toolDeleteName:"Ta bort sidor", toolDeleteDesc:"Ta bort oönskade sidor visuellt",
+    toolReorderName:"Ordna om sidor", toolReorderDesc:"Dra och släpp sidor i ny ordning",
+    toolImagesName:"Bilder till PDF", toolImagesDesc:"Konvertera JPG/PNG till PDF",
+    toolMetaName:"Rensa metadata", toolMetaDesc:"Ta bort PDF-metadata",
+    toolViewerName:"PDF-visare", toolViewerDesc:"Visa PDF med zoom och navigering",
+    toolRedactName:"Visuell redigering", toolRedactDesc:"Rita svarta rutor över känsliga områden",
+    btnDownload:"Ladda ner PDF", btnProcess:"Bearbeta", btnClear:"Rensa",
+    dropPDF:"Släpp PDF här eller klicka", dropPDFs:"Släpp PDF-filer här eller klicka",
+    dropImages:"Släpp bilder här eller klicka",
+    statusNoPDF:"Välj en PDF-fil först.", statusNoPDFs:"Välj minst 2 PDF-filer.",
+    statusNoImages:"Välj minst en bild.", statusInvalidRange:"Ogiltigt sidintervall.",
+    statusAllDeleted:"Kan inte ta bort alla sidor.",
+    statusProcessing:"Bearbetar…", statusSuccess:"Klart! Din fil laddas ner.",
+    statusErrorEncrypted:"Denna PDF verkar vara krypterad eller skadad.",
+    statusErrorGeneral:"Ett fel uppstod. Försök igen.",
+    previewTitle:"Liveförhandsvisning", previewEmpty:"Välj ett verktyg och ladda en PDF.",
+    footerTagline:"Premium webbverktyg — Gratis, Snabbt, Privat",
+    footerSecurity:"Alla verktyg körs säkert på klientsidan",
+    footerCopy:"© 2026 Pratix.io — Alla rättigheter förbehållna.",
+    mergeBtnProcess:"Slå ihop PDF:er", splitBtnProcess:"Dela PDF",
+    rotateBtnProcess:"Rotera & Ladda ner", deleteBtnProcess:"Ladda ner utan borttagna sidor",
+    reorderBtnProcess:"Ladda ner omordnad PDF", imagesBtnProcess:"Konvertera till PDF",
+    metaBtnProcess:"Rensa & Ladda ner", redactBtnProcess:"Tillämpa redigeringar & Ladda ner",
+    seoFaqTitle:"Vanliga frågor",
+    faqQ1:"Laddas mina PDF-filer upp till en server?",
+    faqA1:"Nej. All bearbetning sker i din webbläsare. Dina filer lämnar aldrig din enhet.",
+    faqQ2:"Kan jag ordna om sidor visuellt?",
+    faqA2:"Ja. Dra miniatyrer till önskad ordning i verktyget Ordna om.",
+    faqQ3:"Kan jag manuellt välja redigeringsområden?",
+    faqA3:"Ja. Klicka och dra på förhandsvisningen för att rita rutor.",
+    faqQ4:"Varför ingår inte OCR och lösenordsborttagning?",
+    faqA4:"OCR kräver stora ML-modeller. Lösenordsborttagning väcker juridiska frågor.",
+  },
+  da: {
+    headerProductName:"PDF-værktøjer", headerProductSub:"Browserbaseret PDF-editor",
+    backLink:"Tilbage til Pratix.io", heroBadge:"100% klientsiden · Ingen upload · Privatliv",
+    heroTitle1:"Privat, hurtig og", heroTitle2:"browserbaseret PDF-redigering",
+    heroDesc:"Flet, opdel, roter, omarranger og rediger PDF-filer i din browser.",
+    sidebarTools:"PDF-værktøjer",
+    toolMergeName:"Flet PDF", toolMergeDesc:"Kombiner flere PDF'er til én",
+    toolSplitName:"Opdel PDF", toolSplitDesc:"Udtræk et sideinterval",
+    toolRotateName:"Roter PDF", toolRotateDesc:"Roter sider 90°, 180°, 270°",
+    toolDeleteName:"Slet sider", toolDeleteDesc:"Fjern uønskede sider visuelt",
+    toolReorderName:"Omarranger sider", toolReorderDesc:"Træk og slip sider i ny rækkefølge",
+    toolImagesName:"Billeder til PDF", toolImagesDesc:"Konverter JPG/PNG til PDF",
+    toolMetaName:"Rens metadata", toolMetaDesc:"Fjern PDF-metadata",
+    toolViewerName:"PDF-fremviser", toolViewerDesc:"Vis PDF med zoom og navigation",
+    toolRedactName:"Visuel redigering", toolRedactDesc:"Tegn sorte bokse over følsomme områder",
+    btnDownload:"Download PDF", btnProcess:"Behandl", btnClear:"Ryd",
+    dropPDF:"Slip PDF her eller klik", dropPDFs:"Slip PDF-filer her eller klik",
+    dropImages:"Slip billeder her eller klik",
+    statusNoPDF:"Vælg venligst en PDF-fil først.", statusNoPDFs:"Vælg venligst mindst 2 PDF-filer.",
+    statusNoImages:"Vælg venligst mindst ét billede.", statusInvalidRange:"Ugyldigt sideinterval.",
+    statusAllDeleted:"Kan ikke slette alle sider.",
+    statusProcessing:"Behandler…", statusSuccess:"Færdig! Din fil downloades.",
+    statusErrorEncrypted:"Denne PDF ser ud til at være krypteret eller beskadiget.",
+    statusErrorGeneral:"Der opstod en fejl. Prøv venligst igen.",
+    previewTitle:"Live forhåndsvisning", previewEmpty:"Vælg et værktøj og indlæs en PDF.",
+    footerTagline:"Premium webværktøjer — Gratis, Hurtig, Privat",
+    footerSecurity:"Alle værktøjer kører sikkert på klientsiden",
+    footerCopy:"© 2026 Pratix.io — Alle rettigheder forbeholdes.",
+    mergeBtnProcess:"Flet PDF'er", splitBtnProcess:"Opdel PDF",
+    rotateBtnProcess:"Roter & Download", deleteBtnProcess:"Download uden slettede sider",
+    reorderBtnProcess:"Download omarrangeret PDF", imagesBtnProcess:"Konverter til PDF",
+    metaBtnProcess:"Rens & Download", redactBtnProcess:"Anvend redigeringer & Download",
+    seoFaqTitle:"Ofte stillede spørgsmål",
+    faqQ1:"Uploades mine PDF-filer til en server?",
+    faqA1:"Nej. Al behandling sker i din browser. Dine filer forlader aldrig din enhed.",
+    faqQ2:"Kan jeg omarrangere sider visuelt?",
+    faqA2:"Ja. Træk miniaturer til den ønskede rækkefølge i omarranger-værktøjet.",
+    faqQ3:"Kan jeg manuelt vælge redigeringsområder?",
+    faqA3:"Ja. Klik og træk på forhåndsvisningen for at tegne bokse.",
+    faqQ4:"Hvorfor er OCR og adgangskodefjernelse ikke inkluderet?",
+    faqA4:"OCR kræver store ML-modeller. Adgangskodefjernelse rejser juridiske spørgsmål.",
+  },
+  no: {
+    headerProductName:"PDF-verktøy", headerProductSub:"Nettleserbasert PDF-redigerer",
+    backLink:"Tilbake til Pratix.io", heroBadge:"100% klientsiden · Ingen opplasting · Personvern",
+    heroTitle1:"Privat, rask og", heroTitle2:"nettleserbasert PDF-redigering",
+    heroDesc:"Slå sammen, del, roter, omorganiser og rediger PDF-filer i nettleseren din.",
+    sidebarTools:"PDF-verktøy",
+    toolMergeName:"Slå sammen PDF", toolMergeDesc:"Kombiner flere PDF-er til én",
+    toolSplitName:"Del PDF", toolSplitDesc:"Trekk ut et sideområde",
+    toolRotateName:"Roter PDF", toolRotateDesc:"Roter sider 90°, 180°, 270°",
+    toolDeleteName:"Slett sider", toolDeleteDesc:"Fjern uønskede sider visuelt",
+    toolReorderName:"Omorganiser sider", toolReorderDesc:"Dra og slipp sider i ny rekkefølge",
+    toolImagesName:"Bilder til PDF", toolImagesDesc:"Konverter JPG/PNG til PDF",
+    toolMetaName:"Rens metadata", toolMetaDesc:"Fjern PDF-metadata",
+    toolViewerName:"PDF-visning", toolViewerDesc:"Vis PDF med zoom og navigasjon",
+    toolRedactName:"Visuell redigering", toolRedactDesc:"Tegn svarte bokser over sensitive områder",
+    btnDownload:"Last ned PDF", btnProcess:"Behandle", btnClear:"Tøm",
+    dropPDF:"Slipp PDF her eller klikk", dropPDFs:"Slipp PDF-filer her eller klikk",
+    dropImages:"Slipp bilder her eller klikk",
+    statusNoPDF:"Velg en PDF-fil først.", statusNoPDFs:"Velg minst 2 PDF-filer.",
+    statusNoImages:"Velg minst ett bilde.", statusInvalidRange:"Ugyldig sideområde.",
+    statusAllDeleted:"Kan ikke slette alle sider.",
+    statusProcessing:"Behandler…", statusSuccess:"Ferdig! Filen din lastes ned.",
+    statusErrorEncrypted:"Denne PDF-en ser ut til å være kryptert eller ødelagt.",
+    statusErrorGeneral:"Det oppstod en feil. Prøv igjen.",
+    previewTitle:"Live forhåndsvisning", previewEmpty:"Velg et verktøy og last inn en PDF.",
+    footerTagline:"Premium nettverktøy — Gratis, Rask, Privat",
+    footerSecurity:"Alle verktøy kjører sikkert på klientsiden",
+    footerCopy:"© 2026 Pratix.io — Alle rettigheter forbeholdt.",
+    mergeBtnProcess:"Slå sammen PDF-er", splitBtnProcess:"Del PDF",
+    rotateBtnProcess:"Roter & Last ned", deleteBtnProcess:"Last ned uten slettede sider",
+    reorderBtnProcess:"Last ned omorganisert PDF", imagesBtnProcess:"Konverter til PDF",
+    metaBtnProcess:"Rens & Last ned", redactBtnProcess:"Bruk redigeringer & Last ned",
+    seoFaqTitle:"Ofte stilte spørsmål",
+    faqQ1:"Lastes PDF-filene mine opp til en server?",
+    faqA1:"Nei. All behandling skjer i nettleseren din. Filene dine forlater aldri enheten din.",
+    faqQ2:"Kan jeg omorganisere sider visuelt?",
+    faqA2:"Ja. Dra miniatyrbilder til ønsket rekkefølge i omorganiseringsverktøyet.",
+    faqQ3:"Kan jeg manuelt velge redigeringsområder?",
+    faqA3:"Ja. Klikk og dra på forhåndsvisningen for å tegne bokser.",
+    faqQ4:"Hvorfor er ikke OCR og passordfjernelse inkludert?",
+    faqA4:"OCR krever store ML-modeller. Passordfjernelse reiser juridiske spørsmål.",
+  },
+  fi: {
+    headerProductName:"PDF-työkalut", headerProductSub:"Selainpohjainen PDF-editori",
+    backLink:"Takaisin Pratix.io:hon", heroBadge:"100% asiakaspuoli · Ei latausta · Yksityisyys",
+    heroTitle1:"Yksityinen, nopea ja", heroTitle2:"selainpohjainen PDF-muokkaus",
+    heroDesc:"Yhdistä, jaa, kierrä, järjestä uudelleen ja muokkaa PDF-tiedostoja selaimessasi.",
+    sidebarTools:"PDF-työkalut",
+    toolMergeName:"Yhdistä PDF", toolMergeDesc:"Yhdistä useita PDF-tiedostoja yhdeksi",
+    toolSplitName:"Jaa PDF", toolSplitDesc:"Poimi sivualue uudeksi PDF:ksi",
+    toolRotateName:"Kierrä PDF", toolRotateDesc:"Kierrä sivuja 90°, 180°, 270°",
+    toolDeleteName:"Poista sivuja", toolDeleteDesc:"Poista ei-toivotut sivut visuaalisesti",
+    toolReorderName:"Järjestä sivut uudelleen", toolReorderDesc:"Vedä ja pudota sivut uuteen järjestykseen",
+    toolImagesName:"Kuvat PDF:ksi", toolImagesDesc:"Muunna JPG/PNG PDF:ksi",
+    toolMetaName:"Puhdista metatiedot", toolMetaDesc:"Poista PDF-metatiedot",
+    toolViewerName:"PDF-katselin", toolViewerDesc:"Näytä PDF zoomilla ja navigoinnilla",
+    toolRedactName:"Visuaalinen muokkaus", toolRedactDesc:"Piirrä mustia laatikoita arkaluonteisten alueiden päälle",
+    btnDownload:"Lataa PDF", btnProcess:"Käsittele", btnClear:"Tyhjennä",
+    dropPDF:"Pudota PDF tähän tai napsauta", dropPDFs:"Pudota PDF-tiedostot tähän tai napsauta",
+    dropImages:"Pudota kuvat tähän tai napsauta",
+    statusNoPDF:"Valitse ensin PDF-tiedosto.", statusNoPDFs:"Valitse vähintään 2 PDF-tiedostoa.",
+    statusNoImages:"Valitse vähintään yksi kuva.", statusInvalidRange:"Virheellinen sivualue.",
+    statusAllDeleted:"Kaikkia sivuja ei voi poistaa.",
+    statusProcessing:"Käsitellään…", statusSuccess:"Valmis! Tiedostosi latautuu.",
+    statusErrorEncrypted:"Tämä PDF näyttää olevan salattu tai vioittunut.",
+    statusErrorGeneral:"Tapahtui virhe. Yritä uudelleen.",
+    previewTitle:"Reaaliaikainen esikatselu", previewEmpty:"Valitse työkalu ja lataa PDF.",
+    footerTagline:"Premium-verkkotyökalut — Ilmainen, Nopea, Yksityinen",
+    footerSecurity:"Kaikki työkalut toimivat turvallisesti asiakaspuolella",
+    footerCopy:"© 2026 Pratix.io — Kaikki oikeudet pidätetään.",
+    mergeBtnProcess:"Yhdistä PDF:t", splitBtnProcess:"Jaa PDF",
+    rotateBtnProcess:"Kierrä & Lataa", deleteBtnProcess:"Lataa ilman poistettuja sivuja",
+    reorderBtnProcess:"Lataa uudelleenjärjestetty PDF", imagesBtnProcess:"Muunna PDF:ksi",
+    metaBtnProcess:"Puhdista & Lataa", redactBtnProcess:"Käytä muokkauksia & Lataa",
+    seoFaqTitle:"Usein kysytyt kysymykset",
+    faqQ1:"Ladataanko PDF-tiedostoni palvelimelle?",
+    faqA1:"Ei. Kaikki käsittely tapahtuu selaimessasi. Tiedostosi eivät koskaan poistu laitteeltasi.",
+    faqQ2:"Voinko järjestää sivut uudelleen visuaalisesti?",
+    faqA2:"Kyllä. Vedä pikkukuvat haluamaasi järjestykseen Järjestä uudelleen -työkalussa.",
+    faqQ3:"Voinko valita muokkausalueet manuaalisesti?",
+    faqA3:"Kyllä. Napsauta ja vedä esikatselussa laatikoiden piirtämiseksi.",
+    faqQ4:"Miksi OCR ja salasanan poisto eivät sisälly?",
+    faqA4:"OCR vaatii suuria ML-malleja. Salasanan poisto herättää oikeudellisia kysymyksiä.",
+  },
+  zh: {
+    headerProductName:"PDF工具箱", headerProductSub:"基于浏览器的PDF编辑器",
+    backLink:"返回 Pratix.io", heroBadge:"100% 客户端 · 无需上传 · 隐私优先",
+    heroTitle1:"私密、快速的", heroTitle2:"浏览器端PDF编辑",
+    heroDesc:"在浏览器中合并、拆分、旋转、重新排序和编辑PDF文件。您的文件永远不会离开您的设备。",
+    sidebarTools:"PDF工具",
+    toolMergeName:"合并PDF", toolMergeDesc:"将多个PDF合并为一个文件",
+    toolSplitName:"拆分PDF", toolSplitDesc:"提取页面范围为新PDF",
+    toolRotateName:"旋转PDF", toolRotateDesc:"将页面旋转90°、180°、270°",
+    toolDeleteName:"删除页面", toolDeleteDesc:"可视化删除不需要的页面",
+    toolReorderName:"重新排序页面", toolReorderDesc:"拖放页面到新顺序",
+    toolImagesName:"图片转PDF", toolImagesDesc:"将JPG/PNG图片转换为PDF",
+    toolMetaName:"清除元数据", toolMetaDesc:"删除PDF元数据",
+    toolViewerName:"PDF查看器", toolViewerDesc:"使用缩放和导航查看PDF",
+    toolRedactName:"可视化编辑", toolRedactDesc:"在敏感区域绘制黑色方框",
+    btnDownload:"下载PDF", btnProcess:"处理", btnClear:"清除",
+    dropPDF:"将PDF拖放到此处或点击选择", dropPDFs:"将PDF文件拖放到此处或点击选择",
+    dropImages:"将图片拖放到此处或点击选择",
+    statusNoPDF:"请先选择一个PDF文件。", statusNoPDFs:"请至少选择2个PDF文件。",
+    statusNoImages:"请至少选择一张图片。", statusInvalidRange:"无效的页面范围。",
+    statusAllDeleted:"不能删除所有页面。",
+    statusProcessing:"处理中…", statusSuccess:"完成！您的文件正在下载。",
+    statusErrorEncrypted:"此PDF似乎已加密或损坏。",
+    statusErrorGeneral:"发生错误，请重试。",
+    previewTitle:"实时预览", previewEmpty:"选择工具并加载PDF以查看预览。",
+    footerTagline:"高级网络工具 — 免费、快速、私密",
+    footerSecurity:"所有工具均在客户端安全运行",
+    footerCopy:"© 2026 Pratix.io — 保留所有权利。",
+    mergeBtnProcess:"合并PDF", splitBtnProcess:"拆分PDF",
+    rotateBtnProcess:"旋转并下载", deleteBtnProcess:"下载（不含已删除页面）",
+    reorderBtnProcess:"下载重新排序的PDF", imagesBtnProcess:"转换为PDF",
+    metaBtnProcess:"清除并下载", redactBtnProcess:"应用编辑并下载",
+    seoFaqTitle:"常见问题",
+    faqQ1:"我的PDF文件会上传到服务器吗？",
+    faqA1:"不会。所有处理都在您的浏览器中进行。您的文件永远不会离开您的设备。",
+    faqQ2:"我可以可视化地重新排序页面吗？",
+    faqA2:"可以。在重新排序工具中，将缩略图拖到所需顺序，然后点击下载。",
+    faqQ3:"我可以手动选择编辑区域吗？",
+    faqA3:"可以。在可视化编辑工具中，在页面预览上点击并拖动以绘制黑色方框。",
+    faqQ4:"为什么不包含OCR和密码删除功能？",
+    faqA4:"OCR需要大型ML模型，不适合在浏览器中运行。密码删除涉及法律和道德问题。",
+  },
+};
+
+/* ============================================================
+   GLOBAL STATE
+============================================================ */
+let currentLang   = "en";
+let currentTool   = "merge";
+let pdfBytes      = null;   // ArrayBuffer — active PDF
+let pdfDoc        = null;   // pdf-lib PDFDocument
+let pdfJsDoc      = null;   // PDF.js PDFDocumentProxy
+let pageStates    = [];     // [{ originalIndex, order, rotation, deleted }]
+let mergeFiles    = [];     // [{ file, name, size }]
+let imageFiles    = [];     // [{ file, name, size, dataUrl }]
+let previewZoom   = 1.2;
+let previewPage   = 1;      // 1-based visual page index
+let redactions    = [];     // [{ visualPage, x, y, w, h, zoom }]
+let isDrawing     = false;
+let drawStart     = { x: 0, y: 0 };
+let drawRect      = null;   // temp div while drawing
+
+/* ============================================================
+   HELPERS — i18n
+============================================================ */
+function t(key) {
+  const lang = TRANSLATIONS[currentLang] || TRANSLATIONS["en"];
+  const en   = TRANSLATIONS["en"];
+  return lang[key] !== undefined ? lang[key] : (en[key] !== undefined ? en[key] : key);
+}
+
+function applyLanguage() {
+  document.documentElement.lang = currentLang;
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const key = el.getAttribute("data-i18n");
+    const val = t(key);
+    if (val) el.textContent = val;
+  });
+}
+
+/* ============================================================
+   HELPERS — STATUS BOX
+============================================================ */
+function showStatus(containerId, type, message) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const icons = {
+    info:    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
+    success: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+    warning: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+    error:   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+  };
+  el.innerHTML = `<div class="status-box status-${type}">${icons[type]||""}<span>${message}</span></div>`;
+}
+
+function clearStatus(containerId) {
+  const el = document.getElementById(containerId);
+  if (el) el.innerHTML = "";
+}
+
+/* ============================================================
+   HELPERS — FILE SIZE FORMAT
+============================================================ */
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + " B";
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+  return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+}
+
+/* ============================================================
+   HELPERS — DOWNLOAD
+============================================================ */
+function downloadBytes(bytes, filename) {
+  const blob = new Blob([bytes], { type: "application/pdf" });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href     = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
+}
+
+/* ============================================================
+   HELPERS — PARSE PAGE LIST
+   Supports: "all", "1,3,5", "2-6", "1,3,7-10"
+============================================================ */
+function parsePageList(str, total) {
+  str = str.trim().toLowerCase();
+  if (str === "all" || str === "") {
+    return Array.from({ length: total }, (_, i) => i);
+  }
+  const result = new Set();
+  const parts  = str.split(",");
+  for (const part of parts) {
+    const trimmed = part.trim();
+    if (trimmed.includes("-")) {
+      const [a, b] = trimmed.split("-").map(Number);
+      if (isNaN(a) || isNaN(b)) return null;
+      for (let i = a; i <= b; i++) {
+        if (i >= 1 && i <= total) result.add(i - 1);
+      }
+    } else {
+      const n = Number(trimmed);
+      if (isNaN(n)) return null;
+      if (n >= 1 && n <= total) result.add(n - 1);
+    }
+  }
+  return result.size > 0 ? [...result].sort((a, b) => a - b) : null;
+}
+
+/* ============================================================
+   HELPERS — DROPZONE BIND
+============================================================ */
+function bindDropzone(dropEl, inputEl, onFiles) {
+  dropEl.addEventListener("dragover", e => {
+    e.preventDefault();
+    dropEl.classList.add("drag-over");
+  });
+  dropEl.addEventListener("dragleave", () => dropEl.classList.remove("drag-over"));
+  dropEl.addEventListener("drop", e => {
+    e.preventDefault();
+    dropEl.classList.remove("drag-over");
+    onFiles([...e.dataTransfer.files]);
+  });
+  if (inputEl) {
+    inputEl.addEventListener("change", () => onFiles([...inputEl.files]));
+  }
+}
+
+/* ============================================================
+   HELPERS — DRAG REORDER (file list rows)
+============================================================ */
+function bindListDragReorder(listEl, arr, onReorder) {
+  let dragIdx = null;
+  listEl.addEventListener("dragstart", e => {
+    const item = e.target.closest("[data-idx]");
+    if (!item) return;
+    dragIdx = parseInt(item.dataset.idx);
+    e.dataTransfer.effectAllowed = "move";
+  });
+  listEl.addEventListener("dragover", e => {
+    e.preventDefault();
+    const item = e.target.closest("[data-idx]");
+    if (!item) return;
+    listEl.querySelectorAll("[data-idx]").forEach(i => i.classList.remove("drag-over-item"));
+    item.classList.add("drag-over-item");
+  });
+  listEl.addEventListener("dragleave", e => {
+    const item = e.target.closest("[data-idx]");
+    if (item) item.classList.remove("drag-over-item");
+  });
+  listEl.addEventListener("drop", e => {
+    e.preventDefault();
+    const item = e.target.closest("[data-idx]");
+    if (!item) return;
+    const dropIdx = parseInt(item.dataset.idx);
+    if (dragIdx === null || dragIdx === dropIdx) return;
+    const moved = arr.splice(dragIdx, 1)[0];
+    arr.splice(dropIdx, 0, moved);
+    dragIdx = null;
+    listEl.querySelectorAll("[data-idx]").forEach(i => i.classList.remove("drag-over-item"));
+    onReorder();
+  });
+}
+
+/* ============================================================
+   HELPERS — RENDER SVG ICONS (inline)
+============================================================ */
+const SVG = {
+  download: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
+  trash:    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>`,
+  rotate:   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>`,
+  restore:  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>`,
+  chevL:    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>`,
+  chevR:    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`,
+  chevD:    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`,
+  zoomIn:   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>`,
+  zoomOut:  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>`,
+  eye:      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`,
+  grip:     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="9" y1="5" x2="9" y2="19"/><line x1="15" y1="5" x2="15" y2="19"/></svg>`,
+  x:        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+};
+
+/* ============================================================
+   RENDER — SIDEBAR TOOL LIST
+============================================================ */
+function renderToolList() {
+  const list = document.getElementById("toolList");
+  if (!list) return;
+  list.innerHTML = TOOLS.map(tool => `
+    <button class="tool-btn ${tool.id === currentTool ? "active" : ""}"
+            onclick="selectTool('${tool.id}')">
+      <span class="tool-icon">${tool.icon}</span>
+      <span>${t(tool.i18nName)}</span>
+    </button>
+  `).join("");
+}
+
+/* ============================================================
+   RENDER — FAQ
+============================================================ */
+function renderFAQ() {
+  const list = document.getElementById("faqList");
+  if (!list) return;
+  const faqs = [
+    { q: t("faqQ1"), a: t("faqA1") },
+    { q: t("faqQ2"), a: t("faqA2") },
+    { q: t("faqQ3"), a: t("faqA3") },
+    { q: t("faqQ4"), a: t("faqA4") },
+  ];
+  list.innerHTML = faqs.map((faq, i) => `
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFAQ(${i})" id="faq-q-${i}">
+        <span>${faq.q}</span>
+        <span class="faq-chevron">${SVG.chevD}</span>
+      </button>
+      <div class="faq-answer" id="faq-a-${i}">${faq.a}</div>
+    </div>
+  `).join("");
+}
+
+function toggleFAQ(i) {
+  const q = document.getElementById(`faq-q-${i}`);
+  const a = document.getElementById(`faq-a-${i}`);
+  if (!q || !a) return;
+  const open = a.classList.toggle("open");
+  q.classList.toggle("open", open);
+}
+
+/* ============================================================
+   SELECT TOOL
+============================================================ */
+function selectTool(id) {
+  currentTool = id;
+  pdfBytes    = null;
+  pdfDoc      = null;
+  pdfJsDoc    = null;
+  pageStates  = [];
+  previewPage = 1;
+  redactions  = [];
+  renderToolList();
+  renderMainPanel();
+}
+
+/* ============================================================
+   RENDER — MAIN PANEL (dispatcher)
+============================================================ */
+function renderMainPanel() {
+  const panel = document.getElementById("mainPanel");
+  if (!panel) return;
+  const renders = {
+    merge:    renderMergeTool,
+    split:    renderSplitTool,
+    rotate:   renderRotateTool,
+    delete:   renderDeleteTool,
+    reorder:  renderReorderTool,
+    images:   renderImagesTool,
+    metadata: renderMetadataTool,
+    viewer:   renderViewerTool,
+    redact:   renderRedactTool,
+  };
+  const fn = renders[currentTool];
+  if (fn) fn(panel);
+}
+
+/* ============================================================
+   SHARED — SINGLE PDF DROPZONE CARD
+============================================================ */
+function singlePDFDropzoneHTML(inputId, statusId) {
+  return `
+    <div class="card">
+      <div class="card-body">
+        <div class="dropzone" id="dz-${inputId}">
+          <input type="file" id="${inputId}" accept=".pdf,application/pdf" />
+          <span class="dropzone-icon">📄</span>
+          <div class="dropzone-title">${t("dropPDF")}</div>
+          <div class="dropzone-sub"><strong>.PDF</strong></div>
+        </div>
+        <div id="${statusId}" class="mt-12"></div>
+      </div>
+    </div>
+  `;
+}
+
+/* ============================================================
+   LOAD PDF — shared loader (pdf-lib + pdf.js)
+============================================================ */
+async function loadPDFFromFile(file, statusId) {
+  if (!file || file.type !== "application/pdf" && !file.name.endsWith(".pdf")) {
+    showStatus(statusId, "error", t("statusNoPDF"));
+    return false;
+  }
+  if (file.size > 80 * 1024 * 1024) {
+    showStatus(statusId, "warning", t("statusLargeFile"));
+  }
+  showStatus(statusId, "info", t("statusProcessing"));
+  try {
+    const buf = await file.arrayBuffer();
+    pdfBytes  = buf;
+    pdfDoc    = await PDFLib.PDFDocument.load(buf, { ignoreEncryption: false });
+    const numPages = pdfDoc.getPageCount();
+    pageStates = Array.from({ length: numPages }, (_, i) => ({
+      originalIndex: i,
+      order: i,
+      rotation: 0,
+      deleted: false,
+    }));
+    pdfJsDoc = await pdfjsLib.getDocument({ data: buf.slice(0) }).promise;
+    previewPage = 1;
+    redactions  = [];
+    clearStatus(statusId);
+    return true;
+  } catch (err) {
+    console.error(err);
+    const msg = err.message && err.message.includes("encrypt")
+      ? t("statusErrorEncrypted")
+      : t("statusErrorGeneral");
+    showStatus(statusId, "error", msg);
+    return false;
+  }
+}
+/* ============================================================
+   RENDER — MERGE TOOL
+============================================================ */
+function renderMergeTool(panel) {
+  panel.innerHTML = `
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon">🔀</div>
+        <div class="card-header-text">
+          <h2>${t("mergeTitle")}</h2>
+          <p>${t("mergeDesc")}</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="dropzone" id="dz-merge">
+          <input type="file" id="mergeInput" accept=".pdf,application/pdf" multiple />
+          <span class="dropzone-icon">📄</span>
+          <div class="dropzone-title">${t("dropPDFs")}</div>
+          <div class="dropzone-sub"><strong>.PDF</strong> · ${t("mergeHint")}</div>
+        </div>
+        <div id="mergeFileList" class="file-list"></div>
+        <div id="mergeStatus" class="mt-12"></div>
+        <div class="btn-group mt-16">
+          <button class="btn btn-primary" onclick="mergePDFs()">
+            ${SVG.download} ${t("mergeBtnProcess")}
+          </button>
+          <button class="btn btn-secondary" onclick="clearMerge()">
+            ${t("btnClear")}
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  bindDropzone(
+    document.getElementById("dz-merge"),
+    document.getElementById("mergeInput"),
+    files => {
+      const pdfs = files.filter(f => f.name.endsWith(".pdf") || f.type === "application/pdf");
+      pdfs.forEach(f => mergeFiles.push({ file: f, name: f.name, size: f.size }));
+      renderMergeList();
+    }
+  );
+  renderMergeList();
+}
+
+function renderMergeList() {
+  const list = document.getElementById("mergeFileList");
+  if (!list) return;
+  if (mergeFiles.length === 0) { list.innerHTML = ""; return; }
+  list.innerHTML = mergeFiles.map((f, i) => `
+    <div class="file-item" draggable="true" data-idx="${i}">
+      <span class="file-item-icon">📄</span>
+      <span style="color:var(--text-muted);font-size:12px;margin-right:4px;">${SVG.grip}</span>
+      <span class="file-item-name">${f.name}</span>
+      <span class="file-item-size">${formatSize(f.size)}</span>
+      <button class="file-item-remove" onclick="removeMergeFile(${i})" title="Remove">
+        ${SVG.x}
+      </button>
+    </div>
+  `).join("");
+  bindListDragReorder(list, mergeFiles, renderMergeList);
+}
+
+function removeMergeFile(i) {
+  mergeFiles.splice(i, 1);
+  renderMergeList();
+}
+
+function clearMerge() {
+  mergeFiles = [];
+  renderMergeList();
+  clearStatus("mergeStatus");
+}
+
+async function mergePDFs() {
+  if (mergeFiles.length < 2) {
+    showStatus("mergeStatus", "error", t("statusNoPDFs")); return;
+  }
+  showStatus("mergeStatus", "info", t("statusProcessing"));
+  try {
+    const merged = await PDFLib.PDFDocument.create();
+    for (const mf of mergeFiles) {
+      const buf  = await mf.file.arrayBuffer();
+      const src  = await PDFLib.PDFDocument.load(buf);
+      const idxs = src.getPageIndices();
+      const copied = await merged.copyPages(src, idxs);
+      copied.forEach(p => merged.addPage(p));
+    }
+    const bytes = await merged.save();
+    downloadBytes(bytes, "pratix-merged.pdf");
+    showStatus("mergeStatus", "success", t("statusSuccess"));
+  } catch (err) {
+    console.error(err);
+    showStatus("mergeStatus", "error", t("statusErrorGeneral"));
+  }
+}
+
+/* ============================================================
+   RENDER — SPLIT TOOL
+============================================================ */
+function renderSplitTool(panel) {
+  panel.innerHTML = `
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon">✂️</div>
+        <div class="card-header-text">
+          <h2>${t("splitTitle")}</h2>
+          <p>${t("splitDesc")}</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="dropzone" id="dz-split">
+          <input type="file" id="splitInput" accept=".pdf,application/pdf" />
+          <span class="dropzone-icon">📄</span>
+          <div class="dropzone-title">${t("dropPDF")}</div>
+          <div class="dropzone-sub"><strong>.PDF</strong></div>
+        </div>
+        <div id="splitInfo" class="mt-12"></div>
+        <div class="form-row mt-16">
+          <div class="form-group">
+            <label class="form-label">${t("splitFrom")}</label>
+            <input type="number" id="splitFrom" class="form-input" min="1" value="1" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">${t("splitTo")}</label>
+            <input type="number" id="splitTo" class="form-input" min="1" value="1" />
+          </div>
+        </div>
+        <div class="form-hint mt-8">${t("splitHint")}</div>
+        <div id="splitStatus" class="mt-12"></div>
+        <div class="btn-group mt-16">
+          <button class="btn btn-primary" onclick="splitPDF()">
+            ${SVG.download} ${t("splitBtnProcess")}
+          </button>
+        </div>
+      </div>
+    </div>
+    ${renderPreviewPanel()}
+  `;
+  bindDropzone(
+    document.getElementById("dz-split"),
+    document.getElementById("splitInput"),
+    async files => {
+      const f = files.find(f => f.name.endsWith(".pdf") || f.type === "application/pdf");
+      if (!f) return;
+      const ok = await loadPDFFromFile(f, "splitStatus");
+      if (!ok) return;
+      const total = pdfDoc.getPageCount();
+      document.getElementById("splitTo").value = total;
+      document.getElementById("splitTo").max   = total;
+      document.getElementById("splitFrom").max = total;
+      showStatus("splitInfo", "info",
+        `${t("selectedFile")}: <strong>${f.name}</strong> — ${total} ${t("pageCount")}`);
+      await renderCurrentPage();
+      renderThumbnails();
+    }
+  );
+}
+
+async function splitPDF() {
+  if (!pdfDoc) { showStatus("splitStatus", "error", t("statusNoPDF")); return; }
+  const from = parseInt(document.getElementById("splitFrom").value);
+  const to   = parseInt(document.getElementById("splitTo").value);
+  const total = pdfDoc.getPageCount();
+  if (isNaN(from) || isNaN(to) || from < 1 || to < from || to > total) {
+    showStatus("splitStatus", "error", t("statusInvalidRange")); return;
+  }
+  showStatus("splitStatus", "info", t("statusProcessing"));
+  try {
+    const newDoc = await PDFLib.PDFDocument.create();
+    const idxs   = Array.from({ length: to - from + 1 }, (_, i) => from - 1 + i);
+    const copied = await newDoc.copyPages(pdfDoc, idxs);
+    copied.forEach(p => newDoc.addPage(p));
+    const bytes = await newDoc.save();
+    downloadBytes(bytes, `pratix-pages-${from}-${to}.pdf`);
+    showStatus("splitStatus", "success", t("statusSuccess"));
+  } catch (err) {
+    console.error(err);
+    showStatus("splitStatus", "error", t("statusErrorGeneral"));
+  }
+}
+
+/* ============================================================
+   RENDER — ROTATE TOOL
+============================================================ */
+function renderRotateTool(panel) {
+  panel.innerHTML = `
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon">🔄</div>
+        <div class="card-header-text">
+          <h2>${t("rotateTitle")}</h2>
+          <p>${t("rotateDesc")}</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="dropzone" id="dz-rotate">
+          <input type="file" id="rotateInput" accept=".pdf,application/pdf" />
+          <span class="dropzone-icon">📄</span>
+          <div class="dropzone-title">${t("dropPDF")}</div>
+          <div class="dropzone-sub"><strong>.PDF</strong></div>
+        </div>
+        <div id="rotateInfo" class="mt-12"></div>
+        <div class="form-row mt-16">
+          <div class="form-group">
+            <label class="form-label">${t("rotatePages")}</label>
+            <select id="rotatePagesMode" class="form-select" onchange="toggleRotatePageInput()">
+              <option value="all">${t("rotateAllPages")}</option>
+              <option value="specific">${t("rotateSpecific")}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">${t("rotateAngle")}</label>
+            <select id="rotateAngle" class="form-select">
+              <option value="90">90° ↻</option>
+              <option value="180">180°</option>
+              <option value="270">270° ↺</option>
+            </select>
+          </div>
+        </div>
+        <div id="rotatePageInputWrap" class="form-group mt-12 hidden">
+          <label class="form-label">${t("rotateSpecific")}</label>
+          <input type="text" id="rotatePageInput" class="form-input"
+                 placeholder="e.g. 1,3,5-8" />
+        </div>
+        <div id="rotateStatus" class="mt-12"></div>
+        <div class="btn-group mt-16">
+          <button class="btn btn-primary" onclick="downloadRotatedPDF()">
+            ${SVG.download} ${t("rotateBtnProcess")}
+          </button>
+        </div>
+      </div>
+    </div>
+    ${renderPreviewPanel()}
+  `;
+  bindDropzone(
+    document.getElementById("dz-rotate"),
+    document.getElementById("rotateInput"),
+    async files => {
+      const f = files.find(f => f.name.endsWith(".pdf") || f.type === "application/pdf");
+      if (!f) return;
+      const ok = await loadPDFFromFile(f, "rotateStatus");
+      if (!ok) return;
+      showStatus("rotateInfo", "info",
+        `${t("selectedFile")}: <strong>${f.name}</strong> — ${pdfDoc.getPageCount()} ${t("pageCount")}`);
+      await renderCurrentPage();
+      renderThumbnails();
+    }
+  );
+}
+
+function toggleRotatePageInput() {
+  const mode = document.getElementById("rotatePagesMode").value;
+  const wrap = document.getElementById("rotatePageInputWrap");
+  if (wrap) wrap.classList.toggle("hidden", mode !== "specific");
+}
+
+function applyRotationToPreview(pageIdx, deg) {
+  if (!pageStates[pageIdx]) return;
+  pageStates[pageIdx].rotation = (pageStates[pageIdx].rotation + deg) % 360;
+  renderCurrentPage();
+  renderThumbnails();
+}
+
+async function downloadRotatedPDF() {
+  if (!pdfDoc) { showStatus("rotateStatus", "error", t("statusNoPDF")); return; }
+  const mode  = document.getElementById("rotatePagesMode").value;
+  const angle = parseInt(document.getElementById("rotateAngle").value);
+  const total = pdfDoc.getPageCount();
+  let indices;
+  if (mode === "all") {
+    indices = Array.from({ length: total }, (_, i) => i);
+  } else {
+    const raw = document.getElementById("rotatePageInput").value;
+    indices = parsePageList(raw, total);
+    if (!indices) { showStatus("rotateStatus", "error", t("statusInvalidRange")); return; }
+  }
+  showStatus("rotateStatus", "info", t("statusProcessing"));
+  try {
+    const newDoc  = await PDFLib.PDFDocument.create();
+    const copied  = await newDoc.copyPages(pdfDoc, pdfDoc.getPageIndices());
+    copied.forEach(p => newDoc.addPage(p));
+    indices.forEach(i => {
+      const page    = newDoc.getPage(i);
+      const current = page.getRotation().angle;
+      page.setRotation(PDFLib.degrees((current + angle) % 360));
+    });
+    const bytes = await newDoc.save();
+    downloadBytes(bytes, "pratix-rotated.pdf");
+    showStatus("rotateStatus", "success", t("statusSuccess"));
+  } catch (err) {
+    console.error(err);
+    showStatus("rotateStatus", "error", t("statusErrorGeneral"));
+  }
+}
+
+/* ============================================================
+   RENDER — DELETE TOOL
+============================================================ */
+function renderDeleteTool(panel) {
+  panel.innerHTML = `
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon">🗑️</div>
+        <div class="card-header-text">
+          <h2>${t("deleteTitle")}</h2>
+          <p>${t("deleteDesc")}</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="dropzone" id="dz-delete">
+          <input type="file" id="deleteInput" accept=".pdf,application/pdf" />
+          <span class="dropzone-icon">📄</span>
+          <div class="dropzone-title">${t("dropPDF")}</div>
+          <div class="dropzone-sub"><strong>.PDF</strong> · ${t("deleteHint")}</div>
+        </div>
+        <div id="deleteInfo" class="mt-12"></div>
+        <div id="deleteThumbGrid" class="thumb-grid"></div>
+        <div id="deleteStatus" class="mt-12"></div>
+        <div class="btn-group mt-16">
+          <button class="btn btn-primary" onclick="downloadWithoutDeletedPages()">
+            ${SVG.download} ${t("deleteBtnProcess")}
+          </button>
+        </div>
+      </div>
+    </div>
+    ${renderPreviewPanel()}
+  `;
+  bindDropzone(
+    document.getElementById("dz-delete"),
+    document.getElementById("deleteInput"),
+    async files => {
+      const f = files.find(f => f.name.endsWith(".pdf") || f.type === "application/pdf");
+      if (!f) return;
+      const ok = await loadPDFFromFile(f, "deleteStatus");
+      if (!ok) return;
+      showStatus("deleteInfo", "info",
+        `${t("selectedFile")}: <strong>${f.name}</strong> — ${pdfDoc.getPageCount()} ${t("pageCount")}`);
+      await renderCurrentPage();
+      renderThumbnails("deleteThumbGrid");
+    }
+  );
+}
+
+async function downloadWithoutDeletedPages() {
+  if (!pdfDoc) { showStatus("deleteStatus", "error", t("statusNoPDF")); return; }
+  const active = pageStates.filter(p => !p.deleted);
+  if (active.length === 0) {
+    showStatus("deleteStatus", "error", t("statusAllDeleted")); return;
+  }
+  showStatus("deleteStatus", "info", t("statusProcessing"));
+  try {
+    const newDoc = await PDFLib.PDFDocument.create();
+    const idxs   = active.map(p => p.originalIndex);
+    const copied = await newDoc.copyPages(pdfDoc, idxs);
+    copied.forEach(p => newDoc.addPage(p));
+    const bytes = await newDoc.save();
+    downloadBytes(bytes, "pratix-without-deleted-pages.pdf");
+    showStatus("deleteStatus", "success", t("statusSuccess"));
+  } catch (err) {
+    console.error(err);
+    showStatus("deleteStatus", "error", t("statusErrorGeneral"));
+  }
+}
+
+/* ============================================================
+   RENDER — REORDER TOOL
+============================================================ */
+function renderReorderTool(panel) {
+  panel.innerHTML = `
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon">↕️</div>
+        <div class="card-header-text">
+          <h2>${t("reorderTitle")}</h2>
+          <p>${t("reorderDesc")}</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="dropzone" id="dz-reorder">
+          <input type="file" id="reorderInput" accept=".pdf,application/pdf" />
+          <span class="dropzone-icon">📄</span>
+          <div class="dropzone-title">${t("dropPDF")}</div>
+          <div class="dropzone-sub"><strong>.PDF</strong> · ${t("reorderHint")}</div>
+        </div>
+        <div id="reorderInfo" class="mt-12"></div>
+        <div id="reorderThumbGrid" class="thumb-grid"></div>
+        <div id="reorderStatus" class="mt-12"></div>
+        <div class="btn-group mt-16">
+          <button class="btn btn-primary" onclick="downloadReorderedPDF()">
+            ${SVG.download} ${t("reorderBtnProcess")}
+          </button>
+        </div>
+      </div>
+    </div>
+    ${renderPreviewPanel()}
+  `;
+  bindDropzone(
+    document.getElementById("dz-reorder"),
+    document.getElementById("reorderInput"),
+    async files => {
+      const f = files.find(f => f.name.endsWith(".pdf") || f.type === "application/pdf");
+      if (!f) return;
+      const ok = await loadPDFFromFile(f, "reorderStatus");
+      if (!ok) return;
+      showStatus("reorderInfo", "info",
+        `${t("selectedFile")}: <strong>${f.name}</strong> — ${pdfDoc.getPageCount()} ${t("pageCount")}`);
+      await renderCurrentPage();
+      renderThumbnails("reorderThumbGrid");
+    }
+  );
+}
+
+async function downloadReorderedPDF() {
+  if (!pdfDoc) { showStatus("reorderStatus", "error", t("statusNoPDF")); return; }
+  showStatus("reorderStatus", "info", t("statusProcessing"));
+  try {
+    const newDoc = await PDFLib.PDFDocument.create();
+    const idxs   = pageStates.map(p => p.originalIndex);
+    const copied = await newDoc.copyPages(pdfDoc, idxs);
+    copied.forEach((p, i) => {
+      const rot = pageStates[i].rotation;
+      if (rot) p.setRotation(PDFLib.degrees((p.getRotation().angle + rot) % 360));
+      newDoc.addPage(p);
+    });
+    const bytes = await newDoc.save();
+    downloadBytes(bytes, "pratix-reordered.pdf");
+    showStatus("reorderStatus", "success", t("statusSuccess"));
+  } catch (err) {
+    console.error(err);
+    showStatus("reorderStatus", "error", t("statusErrorGeneral"));
+  }
+}
+
+/* ============================================================
+   RENDER — IMAGES TO PDF TOOL
+============================================================ */
+function renderImagesTool(panel) {
+  panel.innerHTML = `
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon">🖼️</div>
+        <div class="card-header-text">
+          <h2>${t("imagesTitle")}</h2>
+          <p>${t("imagesDesc")}</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="dropzone" id="dz-images">
+          <input type="file" id="imagesInput" accept="image/jpeg,image/png" multiple />
+          <span class="dropzone-icon">🖼️</span>
+          <div class="dropzone-title">${t("dropImages")}</div>
+          <div class="dropzone-sub"><strong>JPG / PNG</strong> · ${t("imagesHint")}</div>
+        </div>
+        <div id="imagesFileList" class="file-list"></div>
+        <div id="imagesStatus" class="mt-12"></div>
+        <div class="btn-group mt-16">
+          <button class="btn btn-primary" onclick="imagesToPDF()">
+            ${SVG.download} ${t("imagesBtnProcess")}
+          </button>
+          <button class="btn btn-secondary" onclick="clearImages()">
+            ${t("btnClear")}
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  bindDropzone(
+    document.getElementById("dz-images"),
+    document.getElementById("imagesInput"),
+    files => {
+      const imgs = files.filter(f => f.type === "image/jpeg" || f.type === "image/png");
+      imgs.forEach(f => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          imageFiles.push({ file: f, name: f.name, size: f.size, dataUrl: e.target.result });
+          renderImageList();
+        };
+        reader.readAsDataURL(f);
+      });
+    }
+  );
+  renderImageList();
+}
+
+function renderImageList() {
+  const list = document.getElementById("imagesFileList");
+  if (!list) return;
+  if (imageFiles.length === 0) { list.innerHTML = ""; return; }
+  list.innerHTML = imageFiles.map((f, i) => `
+    <div class="file-item" draggable="true" data-idx="${i}">
+      <img src="${f.dataUrl}" style="width:32px;height:32px;object-fit:cover;border-radius:4px;flex-shrink:0;" />
+      <span class="file-item-name">${f.name}</span>
+      <span class="file-item-size">${formatSize(f.size)}</span>
+      <button class="file-item-remove" onclick="removeImageFile(${i})" title="Remove">
+        ${SVG.x}
+      </button>
+    </div>
+  `).join("");
+  bindListDragReorder(list, imageFiles, renderImageList);
+}
+
+function removeImageFile(i) {
+  imageFiles.splice(i, 1);
+  renderImageList();
+}
+
+function clearImages() {
+  imageFiles = [];
+  renderImageList();
+  clearStatus("imagesStatus");
+}
+
+async function imagesToPDF() {
+  if (imageFiles.length === 0) {
+    showStatus("imagesStatus", "error", t("statusNoImages")); return;
+  }
+  showStatus("imagesStatus", "info", t("statusProcessing"));
+  try {
+    const doc = await PDFLib.PDFDocument.create();
+    for (const imgFile of imageFiles) {
+      const buf  = await imgFile.file.arrayBuffer();
+      let   img;
+      if (imgFile.file.type === "image/png") {
+        img = await doc.embedPng(buf);
+      } else {
+        img = await doc.embedJpg(buf);
+      }
+      const { width, height } = img;
+      const A4W = 595.28, A4H = 841.89;
+      let pw = width, ph = height;
+      if (pw > A4W || ph > A4H) {
+        const ratio = Math.min(A4W / pw, A4H / ph);
+        pw *= ratio; ph *= ratio;
+      }
+      const page = doc.addPage([pw, ph]);
+      page.drawImage(img, { x: 0, y: 0, width: pw, height: ph });
+    }
+    const bytes = await doc.save();
+    downloadBytes(bytes, "pratix-images-to-pdf.pdf");
+    showStatus("imagesStatus", "success", t("statusSuccess"));
+  } catch (err) {
+    console.error(err);
+    showStatus("imagesStatus", "error", t("statusErrorGeneral"));
+  }
+}
+
+/* ============================================================
+   RENDER — METADATA TOOL
+============================================================ */
+function renderMetadataTool(panel) {
+  panel.innerHTML = `
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon">🧹</div>
+        <div class="card-header-text">
+          <h2>${t("metaTitle")}</h2>
+          <p>${t("metaDesc")}</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="dropzone" id="dz-meta">
+          <input type="file" id="metaInput" accept=".pdf,application/pdf" />
+          <span class="dropzone-icon">📄</span>
+          <div class="dropzone-title">${t("dropPDF")}</div>
+          <div class="dropzone-sub"><strong>.PDF</strong></div>
+        </div>
+        <div id="metaInfo" class="mt-12"></div>
+        <div id="metaCurrentInfo" class="mt-12"></div>
+        <div class="form-group mt-16">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text-secondary);">
+            <input type="checkbox" id="metaSetProducer" checked
+                   style="width:16px;height:16px;accent-color:var(--brand-indigo);" />
+            ${t("metaSetProducer")}
+          </label>
+        </div>
+        <div id="metaStatus" class="mt-12"></div>
+        <div class="btn-group mt-16">
+          <button class="btn btn-primary" onclick="cleanMetadata()">
+            ${SVG.download} ${t("metaBtnProcess")}
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  bindDropzone(
+    document.getElementById("dz-meta"),
+    document.getElementById("metaInput"),
+    async files => {
+      const f = files.find(f => f.name.endsWith(".pdf") || f.type === "application/pdf");
+      if (!f) return;
+      const ok = await loadPDFFromFile(f, "metaStatus");
+      if (!ok) return;
+      showStatus("metaInfo", "info",
+        `${t("selectedFile")}: <strong>${f.name}</strong> — ${pdfDoc.getPageCount()} ${t("pageCount")}`);
+      const title    = pdfDoc.getTitle()    || "—";
+      const author   = pdfDoc.getAuthor()   || "—";
+      const subject  = pdfDoc.getSubject()  || "—";
+      const keywords = pdfDoc.getKeywords() || "—";
+      const creator  = pdfDoc.getCreator()  || "—";
+      const producer = pdfDoc.getProducer() || "—";
+      document.getElementById("metaCurrentInfo").innerHTML = `
+        <div class="status-box status-info" style="flex-direction:column;gap:4px;">
+          <strong style="margin-bottom:4px;">Current Metadata</strong>
+          <span>Title: ${title}</span>
+          <span>Author: ${author}</span>
+          <span>Subject: ${subject}</span>
+          <span>Keywords: ${keywords}</span>
+          <span>Creator: ${creator}</span>
+          <span>Producer: ${producer}</span>
+        </div>
+      `;
+    }
+  );
+}
+
+async function cleanMetadata() {
+  if (!pdfDoc) { showStatus("metaStatus", "error", t("statusNoPDF")); return; }
+  showStatus("metaStatus", "info", t("statusProcessing"));
+  try {
+    const newDoc  = await PDFLib.PDFDocument.create();
+    const copied  = await newDoc.copyPages(pdfDoc, pdfDoc.getPageIndices());
+    copied.forEach(p => newDoc.addPage(p));
+    newDoc.setTitle("");
+    newDoc.setAuthor("");
+    newDoc.setSubject("");
+    newDoc.setKeywords([]);
+    newDoc.setCreator("");
+    const setProducer = document.getElementById("metaSetProducer").checked;
+    newDoc.setProducer(setProducer ? "Pratix.io" : "");
+    newDoc.setCreationDate(new Date());
+    newDoc.setModificationDate(new Date());
+    const bytes = await newDoc.save();
+    downloadBytes(bytes, "pratix-metadata-cleaned.pdf");
+    showStatus("metaStatus", "success", t("statusSuccess"));
+  } catch (err) {
+    console.error(err);
+    showStatus("metaStatus", "error", t("statusErrorGeneral"));
+  }
+}
+
+/* ============================================================
+   RENDER — VIEWER TOOL
+============================================================ */
+function renderViewerTool(panel) {
+  panel.innerHTML = `
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon">👁️</div>
+        <div class="card-header-text">
+          <h2>${t("viewerTitle")}</h2>
+          <p>${t("viewerDesc")}</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="dropzone" id="dz-viewer">
+          <input type="file" id="viewerInput" accept=".pdf,application/pdf" />
+          <span class="dropzone-icon">📄</span>
+          <div class="dropzone-title">${t("dropPDF")}</div>
+          <div class="dropzone-sub"><strong>.PDF</strong></div>
+        </div>
+        <div id="viewerStatus" class="mt-12"></div>
+      </div>
+    </div>
+    ${renderPreviewPanel()}
+  `;
+  bindDropzone(
+    document.getElementById("dz-viewer"),
+    document.getElementById("viewerInput"),
+    async files => {
+      const f = files.find(f => f.name.endsWith(".pdf") || f.type === "application/pdf");
+      if (!f) return;
+      const ok = await loadPDFFromFile(f, "viewerStatus");
+      if (!ok) return;
+      clearStatus("viewerStatus");
+      await renderCurrentPage();
+      renderThumbnails();
+    }
+  );
+}
+
+/* ============================================================
+   RENDER — REDACT TOOL
+============================================================ */
+function renderRedactTool(panel) {
+  panel.innerHTML = `
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon">⬛</div>
+        <div class="card-header-text">
+          <h2>${t("redactTitle")}</h2>
+          <p>${t("redactDesc")}</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="status-box status-warning" style="margin-bottom:12px;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex-shrink:0;">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          <span>${t("redactWarning")}</span>
+        </div>
+        <div class="dropzone" id="dz-redact">
+          <input type="file" id="redactInput" accept=".pdf,application/pdf" />
+          <span class="dropzone-icon">📄</span>
+          <div class="dropzone-title">${t("dropPDF")}</div>
+          <div class="dropzone-sub"><strong>.PDF</strong> · ${t("redactHint")}</div>
+        </div>
+        <div id="redactInfo" class="mt-12"></div>
+        <div id="redactStatus" class="mt-12"></div>
+        <div class="btn-group mt-16">
+          <button class="btn btn-danger" onclick="clearPageRedactions()">
+            ${t("redactClear")}
+          </button>
+          <button class="btn btn-primary" onclick="applyRedactionsAndDownload()">
+            ${SVG.download} ${t("redactBtnProcess")}
+          </button>
+        </div>
+      </div>
+    </div>
+    ${renderPreviewPanel(true)}
+  `;
+  bindDropzone(
+    document.getElementById("dz-redact"),
+    document.getElementById("redactInput"),
+    async files => {
+      const f = files.find(f => f.name.endsWith(".pdf") || f.type === "application/pdf");
+      if (!f) return;
+      const ok = await loadPDFFromFile(f, "redactStatus");
+      if (!ok) return;
+      showStatus("redactInfo", "info",
+        `${t("selectedFile")}: <strong>${f.name}</strong> — ${pdfDoc.getPageCount()} ${t("pageCount")}`);
+      await renderCurrentPage();
+      renderThumbnails();
+      bindRedactCanvas();
+    }
+  );
+}
+
+function clearPageRedactions() {
+  redactions = redactions.filter(r => r.visualPage !== previewPage);
+  renderRedactOverlay();
+}
+
+async function applyRedactionsAndDownload() {
+  if (!pdfDoc) { showStatus("redactStatus", "error", t("statusNoPDF")); return; }
+  if (redactions.length === 0) {
+    showStatus("redactStatus", "error", t("statusNoRedactions")); return;
+  }
+  showStatus("redactStatus", "info", t("statusProcessing"));
+  try {
+    const newDoc = await PDFLib.PDFDocument.create();
+    const copied = await newDoc.copyPages(pdfDoc, pdfDoc.getPageIndices());
+    copied.forEach(p => newDoc.addPage(p));
+
+    for (const r of redactions) {
+      const pageIdx = r.visualPage - 1;
+      if (pageIdx < 0 || pageIdx >= newDoc.getPageCount()) continue;
+      const page       = newDoc.getPage(pageIdx);
+      const { height } = page.getSize();
+      const xPdf   = r.x / r.zoom;
+      const yTop   = r.y / r.zoom;
+      const wPdf   = r.w / r.zoom;
+      const hPdf   = r.h / r.zoom;
+      const yPdf   = height - yTop - hPdf;
+      page.drawRectangle({
+        x: xPdf, y: yPdf, width: wPdf, height: hPdf,
+        color: PDFLib.rgb(0, 0, 0),
+      });
+    }
+    const bytes = await newDoc.save();
+    downloadBytes(bytes, "pratix-redacted.pdf");
+    showStatus("redactStatus", "success", t("statusSuccess"));
+  } catch (err) {
+    console.error(err);
+    showStatus("redactStatus", "error", t("statusErrorGeneral"));
+  }
+}
+
+/* ============================================================
+   RENDER — PREVIEW PANEL HTML
+============================================================ */
+function renderPreviewPanel(isRedact = false) {
+  return `
+    <div class="preview-panel">
+      <div class="preview-header">
+        <span class="preview-title">${t("previewTitle")}</span>
+        <div class="preview-controls">
+          <button class="btn btn-secondary btn-sm" onclick="previewPrevPage()">${SVG.chevL}</button>
+          <span class="preview-page-info" id="previewPageInfo">— / —</span>
+          <button class="btn btn-secondary btn-sm" onclick="previewNextPage()">${SVG.chevR}</button>
+          <button class="btn btn-secondary btn-sm" onclick="previewZoomOut()" title="${t("viewerZoomOut")}">${SVG.zoomOut}</button>
+          <button class="btn btn-secondary btn-sm" onclick="previewZoomIn()"  title="${t("viewerZoomIn")}">${SVG.zoomIn}</button>
+        </div>
+      </div>
+      <div class="preview-body" id="previewBody">
+        <div class="preview-empty">
+          <span class="preview-empty-icon">📄</span>
+          <span class="preview-empty-text">${t("previewEmpty")}</span>
+        </div>
+      </div>
+    </div>
+    <div class="preview-panel">
+      <div class="preview-header">
+        <span class="preview-title">Page Thumbnails</span>
+      </div>
+      <div class="card-body">
+        <div class="thumb-grid" id="mainThumbGrid"></div>
+      </div>
+    </div>
+  `;
+}
+
+/* ============================================================
+   PREVIEW — RENDER CURRENT PAGE (PDF.js)
+============================================================ */
+async function renderCurrentPage() {
+  if (!pdfJsDoc) return;
+  const body = document.getElementById("previewBody");
+  if (!body) return;
+
+  const total      = pdfJsDoc.numPages;
+  const clampedPage = Math.max(1, Math.min(previewPage, total));
+  previewPage      = clampedPage;
+
+  const info = document.getElementById("previewPageInfo");
+  if (info) info.textContent = `${previewPage} / ${total}`;
+
+  body.innerHTML = `
+    <div id="preview-canvas-wrap">
+      <canvas id="preview-canvas"></canvas>
+      <div id="redact-overlay"></div>
+      <div id="redact-draw-layer"></div>
+    </div>
+  `;
+
+  try {
+    const page     = await pdfJsDoc.getPage(clampedPage);
+    const viewport = page.getViewport({ scale: previewZoom });
+    const canvas   = document.getElementById("preview-canvas");
+    const ctx      = canvas.getContext("2d");
+    canvas.width   = viewport.width;
+    canvas.height  = viewport.height;
+    await page.render({ canvasContext: ctx, viewport }).promise;
+
+    if (currentTool === "redact") {
+      renderRedactOverlay();
+      bindRedactCanvas();
+    }
+  } catch (err) {
+    console.error("Preview render error:", err);
+  }
+}
+
+/* ============================================================
+   PREVIEW — NAVIGATION & ZOOM
+============================================================ */
+async function previewPrevPage() {
+  if (!pdfJsDoc || previewPage <= 1) return;
+  previewPage--;
+  await renderCurrentPage();
+}
+
+async function previewNextPage() {
+  if (!pdfJsDoc || previewPage >= pdfJsDoc.numPages) return;
+  previewPage++;
+  await renderCurrentPage();
+}
+
+function previewZoomIn() {
+  previewZoom = Math.min(previewZoom + 0.2, 3.0);
+  renderCurrentPage();
+}
+
+function previewZoomOut() {
+  previewZoom = Math.max(previewZoom - 0.2, 0.4);
+  renderCurrentPage();
+}
+
+/* ============================================================
+   THUMBNAILS — RENDER
+============================================================ */
+async function renderThumbnails(gridId) {
+  const targetId = gridId || "mainThumbGrid";
+  const grid     = document.getElementById(targetId);
+  if (!grid || !pdfJsDoc) return;
+  grid.innerHTML = "";
+
+  const total = pdfJsDoc.numPages;
+  for (let i = 0; i < pageStates.length; i++) {
+    const ps      = pageStates[i];
+    const pageNum = ps.originalIndex + 1;
+    const card    = document.createElement("div");
+    card.className = `thumb-card${ps.deleted ? " deleted" : ""}${previewPage === i + 1 ? " selected" : ""}`;
+    card.draggable = true;
+    card.dataset.idx = i;
+
+    const canvasWrap = document.createElement("div");
+    canvasWrap.className = "thumb-canvas-wrap";
+    const canvas = document.createElement("canvas");
+    canvasWrap.appendChild(canvas);
+
+    const footer = document.createElement("div");
+    footer.className = "thumb-footer";
+    footer.innerHTML = `
+      <span class="thumb-page-num">p.${i + 1}</span>
+      <div class="thumb-actions">
+        ${ps.rotation ? `<span class="rotation-badge">${ps.rotation}°</span>` : ""}
+        ${ps.deleted
+          ? `<button class="thumb-action-btn restore" onclick="restorePage(${i})" title="Restore">${SVG.restore}</button>`
+          : `<button class="thumb-action-btn" onclick="rotatePage(${i})" title="Rotate 90°">${SVG.rotate}</button>
+             <button class="thumb-action-btn danger" onclick="deletePage(${i})" title="Remove">${SVG.trash}</button>`
+        }
+      </div>
+    `;
+
+    if (ps.deleted) {
+      const overlay = document.createElement("div");
+      overlay.className = "thumb-deleted-overlay";
+      overlay.textContent = "DELETED";
+      card.appendChild(overlay);
+    }
+
+    card.appendChild(canvasWrap);
+    card.appendChild(footer);
+    grid.appendChild(card);
+
+    card.addEventListener("click", async () => {
+      previewPage = i + 1;
+      await renderCurrentPage();
+      renderThumbnails(gridId);
+    });
+
+    // Render thumbnail canvas
+    try {
+      const page     = await pdfJsDoc.getPage(pageNum);
+      const viewport = page.getViewport({ scale: 0.3 });
+      canvas.width   = viewport.width;
+      canvas.height  = viewport.height;
+      await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+    } catch (e) { /* skip */ }
+  }
+
+  // Drag reorder for thumbnails
+  bindThumbDragReorder(grid, gridId);
+}
+
+/* ============================================================
+   THUMBNAILS — DRAG REORDER
+============================================================ */
+function bindThumbDragReorder(grid, gridId) {
+  let dragIdx = null;
+  grid.addEventListener("dragstart", e => {
+    const card = e.target.closest("[data-idx]");
+    if (!card) return;
+    dragIdx = parseInt(card.dataset.idx);
+    e.dataTransfer.effectAllowed = "move";
+  });
+  grid.addEventListener("dragover", e => {
+    e.preventDefault();
+    const card = e.target.closest("[data-idx]");
+    if (!card) return;
+    grid.querySelectorAll(".thumb-card").forEach(c => c.classList.remove("drag-over-thumb"));
+    card.classList.add("drag-over-thumb");
+  });
+  grid.addEventListener("dragleave", e => {
+    const card = e.target.closest("[data-idx]");
+    if (card) card.classList.remove("drag-over-thumb");
+  });
+  grid.addEventListener("drop", e => {
+    e.preventDefault();
+    const card = e.target.closest("[data-idx]");
+    if (!card) return;
+    const dropIdx = parseInt(card.dataset.idx);
+    if (dragIdx === null || dragIdx === dropIdx) return;
+    const moved = pageStates.splice(dragIdx, 1)[0];
+    pageStates.splice(dropIdx, 0, moved);
+    dragIdx = null;
+    renderThumbnails(gridId);
+    if (previewPage > pageStates.length) previewPage = pageStates.length;
+    renderCurrentPage();
+  });
+}
+
+/* ============================================================
+   PAGE ACTIONS — DELETE / RESTORE / ROTATE
+============================================================ */
+function deletePage(i) {
+  const active = pageStates.filter(p => !p.deleted);
+  if (active.length <= 1) {
+    const sid = currentTool === "delete" ? "deleteStatus" : "reorderStatus";
+    showStatus(sid, "error", t("statusAllDeleted")); return;
+  }
+  pageStates[i].deleted = true;
+  const gridId = currentTool === "delete" ? "deleteThumbGrid" : "mainThumbGrid";
+  renderThumbnails(gridId);
+}
+
+function restorePage(i) {
+  pageStates[i].deleted = false;
+  const gridId = currentTool === "delete" ? "deleteThumbGrid" : "mainThumbGrid";
+  renderThumbnails(gridId);
+}
+
+function rotatePage(i) {
+  pageStates[i].rotation = (pageStates[i].rotation + 90) % 360;
+  const gridId = currentTool === "delete" ? "deleteThumbGrid" : "mainThumbGrid";
+  renderThumbnails(gridId);
+  if (previewPage === i + 1) renderCurrentPage();
+}
+
+/* ============================================================
+   REDACTION — OVERLAY RENDER
+============================================================ */
+function renderRedactOverlay() {
+  const overlay = document.getElementById("redact-overlay");
+  if (!overlay) return;
+  const pageRects = redactions.filter(r => r.visualPage === previewPage);
+  overlay.innerHTML = pageRects.map(r =>
+    `<div class="redact-rect" style="left:${r.x}px;top:${r.y}px;width:${r.w}px;height:${r.h}px;"></div>`
+  ).join("");
+}
+
+/* ============================================================
+   REDACTION — CANVAS DRAW BINDING
+============================================================ */
+function bindRedactCanvas() {
+  const layer = document.getElementById("redact-draw-layer");
+  if (!layer) return;
+  layer.onmousedown = e => {
+    isDrawing = true;
+    const rect = layer.getBoundingClientRect();
+    drawStart  = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    drawRect   = document.createElement("div");
+    drawRect.className = "redact-rect-drawing";
+    drawRect.style.left   = drawStart.x + "px";
+    drawRect.style.top    = drawStart.y + "px";
+    drawRect.style.width  = "0px";
+    drawRect.style.height = "0px";
+    layer.appendChild(drawRect);
+  };
+  layer.onmousemove = e => {
+    if (!isDrawing || !drawRect) return;
+    const rect = layer.getBoundingClientRect();
+    const cx   = e.clientX - rect.left;
+    const cy   = e.clientY - rect.top;
+    const x    = Math.min(cx, drawStart.x);
+    const y    = Math.min(cy, drawStart.y);
+    const w    = Math.abs(cx - drawStart.x);
+    const h    = Math.abs(cy - drawStart.y);
+    drawRect.style.left   = x + "px";
+    drawRect.style.top    = y + "px";
+    drawRect.style.width  = w + "px";
+    drawRect.style.height = h + "px";
+  };
+  layer.onmouseup = e => {
+    if (!isDrawing) return;
+    isDrawing = false;
+    if (!drawRect) return;
+    const x = parseFloat(drawRect.style.left);
+    const y = parseFloat(drawRect.style.top);
+    const w = parseFloat(drawRect.style.width);
+    const h = parseFloat(drawRect.style.height);
+    drawRect.remove();
+    drawRect = null;
+    if (w > 5 && h > 5) {
+      redactions.push({ visualPage: previewPage, x, y, w, h, zoom: previewZoom });
+      renderRedactOverlay();
+    }
+  };
+  layer.onmouseleave = e => {
+    if (isDrawing) {
+      isDrawing = false;
+      if (drawRect) { drawRect.remove(); drawRect = null; }
+    }
+  };
+}
+/* ============================================================
+   INIT — LANGUAGE SELECT EVENT
+============================================================ */
+document.getElementById("languageSelect").addEventListener("change", function () {
+  currentLang = this.value;
+  applyLanguage();
+  renderToolList();
+  renderFAQ();
+  renderMainPanel();
+});
+
+/* ============================================================
+   INIT — MAIN
+============================================================ */
+function init() {
+  currentLang = "en";
+  currentTool = "merge";
+  mergeFiles  = [];
+  imageFiles  = [];
+  applyLanguage();
+  renderToolList();
+  renderFAQ();
+  renderMainPanel();
+}
+
+init();
+</script>
+</body>
+</html>
+
