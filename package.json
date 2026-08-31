@@ -1,0 +1,9 @@
+{
+  "name": "pratix-pdfeditor",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "build": "node scripts/prerender.js",
+    "test": "npm run build && node scripts/verify-prerender.js"
+  }
+}
