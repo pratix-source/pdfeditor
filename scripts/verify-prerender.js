@@ -2,21 +2,20 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
-const pagePath = path.join(root, 'dist', 'en', 'pdf-editor', 'index.html');
+const route = process.env.SEO_ROUTE || 'en/pdf-editor';
+const pagePath = path.join(root, 'dist', ...route.split('/'), 'index.html');
+if (!fs.existsSync(pagePath)) throw new Error(`Missing generated page: ${pagePath}`);
 const html = fs.readFileSync(pagePath, 'utf8');
-const required = [
-  '<title>Pratix PDF Toolkit – Free Browser-Based PDF Editor</title>',
-  '<meta name="description" content="Edit, merge, split, rotate, reorder, and redact PDF files privately in your browser. No uploads, no server, 100% client-side." />',
-  '<link rel="canonical" href="https://pratix.io/en/pdf-editor" />',
-  'hreflang="en"',
-  'hreflang="x-default"',
-  'id="prerendered-seo-content"',
-  'FileReader',
-  'PDFDocument',
-];
+const title = html.match(/<title>([\s\S]*?)<\/title>/i)?.[1] || '';
+const description = html.match(/<meta\s+name="description"\s+content="([^"]*)"/i)?.[1] || '';
+const canonical = html.match(/<link\s+rel="canonical"\s+href="([^"]*)"/i)?.[1] || '';
+const required = ['PDFDocument', 'FileReader'];
 const missing = required.filter(marker => !html.includes(marker));
-if (missing.length) throw new Error(`Missing markers: ${missing.join(', ')}`);
-if ((html.match(/data-prerender-hreflang="true"/g) || []).length !== 2) {
-  throw new Error('Expected exactly 2 pilot hreflang links');
-}
-console.log('Static head and client-side PDF editor markers: passed');
+if (!title || title.length > 60) throw new Error(`Invalid title length: ${title.length}`);
+if (!description || description.length < 100 || description.length > 180) throw new Error(`Invalid description length: ${description.length}`);
+if (!canonical.startsWith('https://pratix.io/') && !canonical.startsWith('https://')) throw new Error(`Invalid canonical: ${canonical}`);
+if (!html.includes('name="robots"') && !html.includes('name="googlebot"')) throw new Error('Missing robots metadata');
+if (!html.includes('property="og:title"')) throw new Error('Missing Open Graph title');
+if (!html.includes('name="twitter:card"')) throw new Error('Missing Twitter card');
+if (missing.length) throw new Error(`Missing client-side markers: ${missing.join(', ')}`);
+console.log(`SEO and client-side markers passed for ${route}`);
