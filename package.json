@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "build": "node scripts/prerender.js",
+    "build": "node scripts/prerender.js && sh scripts/run-seo-postprocess.sh",
     "test": "npm run build && node scripts/verify-prerender.js"
   }
 }
